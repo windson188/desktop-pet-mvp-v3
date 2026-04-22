@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>桌面宠物 v2</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+<div id="app">
+  <!-- 待办面板 -->
+  <div id="todo-panel" class="panel hidden">
+    <div class="panel-section">
+      <div class="section-title" style="display: flex; justify-content: space-between; align-items: center;">
+        <span>待办</span>
+        <button class="add-btn" data-type="todo">添加</button>
+      </div>
+      <div id="todo-list" class="list"></div>
+    </div>
+    <div id="completed-section" class="panel-section">
+      <div class="section-title" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+        <span>📋 已完成待办（最近5条）<span style="font-size:12px;">(展开)</span></span>
+      </div>
+      <div class="completed-content" style="display: none;"></div>
+    </div>
+  </div>
+
+  <!-- 提醒面板 -->
+  <div id="reminder-panel" class="panel hidden">
+    <div class="panel-section">
+      <div class="section-title" style="display: flex; justify-content: space-between; align-items: center;">
+        <span>提醒</span>
+        <button class="add-btn" data-type="reminder">添加</button>
+      </div>
+      <div id="reminder-list" class="list"></div>
+    </div>
+  </div>
+
+  <!-- 输入区域 -->
+  <div id="input-area" class="hidden"></div>
+
+  <!-- 固定区域（始终位于底部） -->
+  <div class="fixed-area">
+    <!-- 底部按钮栏 -->
+    <div id="bottom-panel" class="panel hidden" style="display: none !important;">
+      <button id="feed-btn">投喂</button>
+      <button id="todo-btn">待办</button>
+      <button id="pet-btn">摸摸</button>
+      <button id="reminder-btn">提醒</button>
+    </div>
+
+    <!-- 气泡 -->
+    <div id="bubble">戳我一下试试？</div>
+
+    <!-- 宠物主体 -->
+    <div id="pet" class="pet-sprite idle"></div>
+  </div>
+</div>
+
+<script type="module" src="./renderer.js"></script>
+
+<!-- 自定义编辑模态框 -->
+<div id="edit-modal" class="modal hidden">
+  <div class="modal-content">
+    <h3 id="modal-title">编辑</h3>
+    <input type="text" id="modal-input" placeholder="请输入内容" />
+    <div class="modal-actions">
+      <button id="modal-cancel">取消</button>
+      <button id="modal-confirm">确定</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,352 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Microsoft YaHei", sans-serif;
+  background: transparent;
+  overflow: hidden;
+}
+
+#app {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px 12px 0 12px;   /* 略微减小顶部内边距 */
+  gap: 2px;                    /* 区域之间的间隔从5px调小到2px */
+  position: relative;
+}
+
+.fixed-area {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;                    /* 宠物、气泡、按钮栏之间的间隔调小 */
+  width: 100%;
+}
+
+#bottom-panel {
+  margin-bottom: 8px;          /* 稍微减小底部外边距 */
+}
+
+.panel {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(8px);
+  border-radius: 16px;
+  padding: 10px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+  width: 100%;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.panel-section + .panel-section {
+  margin-top: 12px;
+}
+
+.section-title {
+  font-size: 13px;
+  font-weight: bold;
+  margin-bottom: 6px;
+  color: #444;
+}
+
+.list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 10px;
+  padding: 8px 10px;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+
+.list-item.done .text {
+  text-decoration: line-through;
+  opacity: 0.55;
+}
+
+.actions {
+  display: flex;
+  gap: 6px;
+}
+
+.actions button {
+  border: none;
+  background: #f0f0f0;
+  border-radius: 8px;
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
+#bubble {
+  max-width: 240px;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 16px;
+  padding: 8px 12px;
+  font-size: 14px;
+  color: #333;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  -webkit-app-region: no-drag;
+}
+
+/* 宠物区宽度改为180px，高度同步增加 */
+#pet {
+  width: 180px;
+  height: 180px;
+  border-radius: 0;            /* 完全透明无背景，去掉圆角 */
+  background-color: transparent;
+  box-shadow: none;
+  cursor: pointer;
+  user-select: none;
+  pointer-events: auto;
+  -webkit-app-region: no-drag;
+  margin-top: 2px;             /* 微调顶部间距 */
+}
+
+/* 精灵图基础样式 */
+.pet-sprite {
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;    /* 保证图片完整显示，不裁剪 */
+}
+
+/* 闲置状态：单帧静态图 */
+.pet-sprite.idle {
+  background-image: url('./assets/idle.png');
+  background-size: 180px 180px;  /* 适配新尺寸 */
+}
+
+/* 开心动画：13帧，总宽1950px，每帧150px -> 但宠物宽180px，需要重新计算？ */
+/* 注意：你的happy.png是1950x150，每帧150x150，现在宠物宽180px，如果直接拉伸会变形 */
+/* 解决方案：保持背景图原始比例，使用background-size: contain，让图片等比例缩放，但动画移动距离也需要按比例调整 */
+/* 或者重新生成适配180px宽的精灵图。为简化，这里保持图片原始尺寸，但背景位置移动距离按比例换算 */
+/* 下面的CSS假设你的happy.png仍是1950x150，每帧150px，但显示区域180px，背景图会被缩放 */
+/* 更精确的做法：background-size: auto 180px; 然后移动距离 = 180 * 13 = 2340px，但图片宽度只有1950，会露白 */
+/* 因此建议重新生成180px宽的精灵图，或者接受图片被拉伸。这里提供一种兼容写法：让背景图高度填满，宽度自适应，但移动距离按比例计算 */
+/* 由于你的精灵图每帧150px，显示180px，缩放比 = 180/150 = 1.2，总移动距离应为 1950 * 1.2 = 2340px */
+.pet-sprite.happy {
+  background-image: url('./assets/happy.png');
+  background-size: auto 180px;   /* 高度填满180px，宽度等比缩放（实际宽度 = 1950 * 1.2 = 2340px） */
+  animation: happyAnim 2.0s steps(13) forwards;
+}
+
+@keyframes happyAnim {
+  0%   { background-position: 0 0; }
+  100% { background-position: -2340px 0; }  /* 总移动距离 = 每帧宽(150)*缩放比1.2*13帧 = 2340px */
+}
+
+/* 如果你的happy.png已经是180px高的版本，请相应调整background-size和移动距离 */
+
+#pet-status {
+  display: none;
+}
+
+#bottom-panel {
+  display: flex;
+  justify-content: space-around;
+  gap: 8px;
+  padding: 2px 8px;
+}
+
+#bottom-panel button {
+  border: none;
+  border-radius: 10px;
+  padding: 6px 10px;
+  background: #ffffff;
+  cursor: pointer;
+  font-size: 13px;
+  flex: 1;
+  min-width: 60px;
+}
+
+#input-area {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(12px);
+  border-radius: 20px;
+  padding: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  width: 280px;
+  z-index: 1000;
+}
+
+#todo-panel,
+#reminder-panel {
+  position: absolute;
+  width: auto;
+  min-width: 200px;
+  z-index: 900;
+}
+
+.input-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.input-row input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  outline: none;
+}
+
+.input-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.completed-content {
+  margin-top: 6px;
+  max-height: 140px;
+  overflow-y: auto;
+}
+.completed-content .list-item {
+  background: rgba(240, 240, 240, 0.8);
+}
+.section-title {
+  cursor: pointer;
+  user-select: none;
+}
+
+#todo-list,
+#reminder-list {
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+#todo-list::-webkit-scrollbar,
+#reminder-list::-webkit-scrollbar,
+.completed-content::-webkit-scrollbar {
+  width: 6px;
+}
+#todo-list::-webkit-scrollbar-track,
+#reminder-list::-webkit-scrollbar-track,
+.completed-content::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+}
+#todo-list::-webkit-scrollbar-thumb,
+#reminder-list::-webkit-scrollbar-thumb,
+.completed-content::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 3px;
+}
+#todo-list::-webkit-scrollbar-thumb:hover,
+#reminder-list::-webkit-scrollbar-thumb:hover,
+.completed-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.add-btn {
+  border: none;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.add-btn:hover {
+  background: rgba(255, 255, 255, 1);
+}
+
+/* 右键菜单样式 */
+.status-context-menu {
+  position: fixed;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  color: white;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 13px;
+  line-height: 1.6;
+  z-index: 10000;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  white-space: nowrap;
+  font-family: monospace;
+  pointer-events: none;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+.status-context-menu div {
+  margin: 4px 0;
+}
+
+/* 模态框背景透明 */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10001;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  width: 280px;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.modal-content h3 {
+  margin: 0 0 15px 0;
+  font-size: 18px;
+}
+
+.modal-content input {
+  width: 100%;
+  padding: 8px 12px;
+  margin-bottom: 20px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.modal-actions button {
+  padding: 6px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  background: #f0f0f0;
+  font-size: 14px;
+}
+
+.modal-actions button#modal-confirm {
+  background: #4caf50;
+  color: white;
+}
+
+.modal-actions button#modal-confirm:hover {
+  background: #45a049;
+}
+
+.modal-actions button#modal-cancel:hover {
+  background: #e0e0e0;
+}

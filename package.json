@@ -1,0 +1,13 @@
+{
+"name": "desktop-pet-v2",
+"version": "1.0.0",
+"description": "A lightweight desktop pet MVP",
+"main": "main.js",
+"type": "commonjs",
+"scripts": {
+"start": "electron ."
+},
+"devDependencies": {
+"electron": "^35.0.0"
+}
+}
