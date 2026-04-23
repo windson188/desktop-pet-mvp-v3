@@ -337,12 +337,16 @@ function bindEvents() {
     resetBubbleCycle();
   });
 
-  pet?.addEventListener("click", () => {
-    if (window.__isDraggingPet) return;
+pet?.addEventListener("click", () => {
+    // 如果正处于拖动模式或拖动刚结束后的禁止期，则不唤醒
+    if (window._disablePetClick) return;
+
+    // 原有的 dragJustHappened 判断可以保留
     if (dragJustHappened) {
       dragJustHappened = false;
       return;
     }
+    // ... 其余代码保持不变
     if (uiState.getActivePanel() || uiState.getActiveInput()) {
       uiState.setActivePanel(null);
       uiState.closeInput();
@@ -436,10 +440,10 @@ async function init() {
     uiState.sleep();
     uiState.setActivePanel(null);
 
-const { x, y } = appState.window;
-if (typeof x === 'number' && typeof y === 'number' && !isNaN(x) && !isNaN(y)) {
-  await window.desktopPetAPI.setWindowPosition(x, y);
-}
+    const { x, y } = appState.window;
+    if (typeof x === 'number' && typeof y === 'number' && !isNaN(x) && !isNaN(y)) {
+      await window.desktopPetAPI.setWindowPosition(x, y);
+    }
 
     renderAll();
 

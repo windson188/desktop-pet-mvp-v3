@@ -12,18 +12,13 @@ export function renderPet({ petState, uiState }) {
   // 更新宠物的 CSS 类（基于 emotion）
   if (petEl) {
     const currentEmotion = petState.getEmotion();
-    // 移除所有可能的状态类（可扩展更多）
     petEl.classList.remove('idle', 'happy');
     petEl.classList.add(currentEmotion);
 
-    // 如果当前是 happy 动画（一次性），监听动画结束事件自动切回 idle
     if (currentEmotion === 'happy') {
-      // 先移除之前的监听器，避免重复绑定
       const onAnimEnd = () => {
-        // 确保动画结束后，如果宠物状态仍然是 happy，则切回 idle
         if (petState.getEmotion() === 'happy') {
           petState.setEmotion('idle');
-          // 重新渲染以更新 CSS 类
           renderPet({ petState, uiState });
         }
         petEl.removeEventListener('animationend', onAnimEnd);
@@ -32,10 +27,12 @@ export function renderPet({ petState, uiState }) {
     }
   }
 
-  // 控制底部按钮栏和面板的显隐（原有逻辑）
+  // 控制底部按钮栏和面板的显隐
   if (uiState.getIsAwake()) {
+    // 移除 hidden 类，并强制设置 display 为 flex（确保可见）
     bottomPanel.classList.remove("hidden");
     bottomPanel.style.display = 'flex';
+
     const activePanel = uiState.getActivePanel();
     if (activePanel === 'todo') {
       positionPanel(todoPanel, bottomPanel);
