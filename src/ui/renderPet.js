@@ -1,4 +1,6 @@
 // src/ui/renderPet.js
+import { startClapAnimation, stopClapAnimation } from './clapAnimation.js';
+
 export function renderPet({ petState, uiState }) {
   const petEl = document.getElementById("pet");
   const bubbleEl = document.getElementById("bubble");
@@ -6,30 +8,43 @@ export function renderPet({ petState, uiState }) {
   const todoPanel = document.getElementById("todo-panel");
   const reminderPanel = document.getElementById("reminder-panel");
 
-  // 更新气泡文字
   if (bubbleEl) bubbleEl.textContent = petState.getBubble();
 
-  // 更新宠物的 CSS 类（基于 emotion）
   if (petEl) {
     const currentEmotion = petState.getEmotion();
-    petEl.classList.remove('idle', 'happy');
-    petEl.classList.add(currentEmotion);
+    petEl.classList.remove('idle', 'happy', 'clap');
 
-    if (currentEmotion === 'happy') {
-      const onAnimEnd = () => {
-        if (petState.getEmotion() === 'happy') {
-          petState.setEmotion('idle');
-          renderPet({ petState, uiState });
-        }
-        petEl.removeEventListener('animationend', onAnimEnd);
-      };
-      petEl.addEventListener('animationend', onAnimEnd, { once: true });
+    if (currentEmotion === 'clap') {
+      // 鼓掌动画由 JS 驱动，每次重新开始
+      startClapAnimation(petEl, petState, () => renderPet({ petState, uiState }));
+      petEl.classList.add('clap');   // 仅用于设置背景图路径
+    } else {
+      // 停止可能残留的鼓掌动画
+      stopClapAnimation();
+
+      // 清除 JS 动画留下的内联样式，让 CSS 控制背景尺寸和位置
+      petEl.style.backgroundSize = '';
+      petEl.style.backgroundPosition = '';
+
+      // 添加当前情绪类（idle 或 happy）
+      petEl.classList.add(currentEmotion);
+
+      // happy 动画结束后自动恢复 idle
+      if (currentEmotion === 'happy') {
+        const onAnimEnd = () => {
+          if (petState.getEmotion() === 'happy') {
+            petState.setEmotion('idle');
+            renderPet({ petState, uiState });
+          }
+          petEl.removeEventListener('animationend', onAnimEnd);
+        };
+        petEl.addEventListener('animationend', onAnimEnd, { once: true });
+      }
     }
   }
 
-  // 控制底部按钮栏和面板的显隐
+  // 底部按钮栏和面板显隐控制（与之前完全一致）
   if (uiState.getIsAwake()) {
-    // 移除 hidden 类，并强制设置 display 为 flex（确保可见）
     bottomPanel.classList.remove("hidden");
     bottomPanel.style.display = 'flex';
 
@@ -58,24 +73,23 @@ function positionPanel(panel, buttonBar) {
   if (!panel || !buttonBar) return;
 
   panel.style.position = 'absolute';
-
   const buttonRect = buttonBar.getBoundingClientRect();
 
   const wasHidden = panel.classList.contains("hidden");
   if (wasHidden) panel.classList.remove("hidden");
 
-  const originalMaxHeight = panel.style.maxHeight;
-  const originalOverflowY = panel.style.overflowY;
-  const originalDisplay = panel.style.display;
+  const origMaxH = panel.style.maxHeight;
+  const origOverflow = panel.style.overflowY;
+  const origDisplay = panel.style.display;
   panel.style.maxHeight = 'none';
   panel.style.overflowY = 'visible';
   panel.style.display = 'block';
 
   const naturalHeight = panel.offsetHeight;
 
-  panel.style.maxHeight = originalMaxHeight;
-  panel.style.overflowY = originalOverflowY;
-  panel.style.display = originalDisplay;
+  panel.style.maxHeight = origMaxH;
+  panel.style.overflowY = origOverflow;
+  panel.style.display = origDisplay;
   if (wasHidden) panel.classList.add("hidden");
 
   const OFFSET_Y = -10;

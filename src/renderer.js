@@ -33,7 +33,6 @@ function debouncedPersist() {
       ui: uiState.getState(),
       window: { x: null, y: null }
     };
-    // 直接调用，saveState 内部已经捕获异常，不需要 catch
     window.desktopPetAPI.saveState(state);
   }, PERSIST_DELAY);
 }
@@ -170,6 +169,8 @@ function renderAll() {
     onCompleteTodo: (id, text) => {
       todoState.completeTodo(id);
       petState.setBubble(`主人，你真棒，又完成${text}了哦！`);
+      // 触发鼓掌动画
+      petState.setEmotion('clap');
       debouncedPersist();
       renderAll();
       updateWindowHeight();
@@ -202,6 +203,8 @@ function renderAll() {
     },
     onCompleteReminder: (id, reminderText) => {
       petState.setBubble(`主人，你真棒，又完成${reminderText}了哦！`);
+      // 触发鼓掌动画
+      petState.setEmotion('clap');
       reminderState.completeReminder(id);
       debouncedPersist();
       renderAll();

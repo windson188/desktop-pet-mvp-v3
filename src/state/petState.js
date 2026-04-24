@@ -6,7 +6,7 @@ export function createPetState(initialPet) {
     bond: initialPet?.bond ?? 6,
     lastInteractAt: initialPet?.lastInteractAt || Date.now(),
     bubble: "戳我一下试试？",
-    emotion: initialPet?.emotion ?? 'idle'   // 新增：当前情绪/动作状态
+    emotion: initialPet?.emotion ?? 'idle'   // 当前情绪/动作状态
   };
 
   let decayIntervals = [];
@@ -90,9 +90,9 @@ export function createPetState(initialPet) {
     console.log(`提醒触发：精力-1，亲密度+1`);
   }
 
-  // ========== 新增：情绪/动作管理 ==========
+  // ========== 情绪/动作管理 ==========
   function setEmotion(emo) {
-    const valid = ['idle', 'happy'];   // 后续可扩展 'eat', 'talk', 'walk' 等
+    const valid = ['idle', 'happy', 'clap'];   // 加入 clap
     if (valid.includes(emo)) {
       state.emotion = emo;
     }
@@ -159,7 +159,7 @@ export function createPetState(initialPet) {
     getRandomLine() {
       return randomLines[Math.floor(Math.random() * randomLines.length)];
     },
-    // 新增
+    // 新增 clap 支持已在 setEmotion 中体现
     setEmotion,
     getEmotion
   };

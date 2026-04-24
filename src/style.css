@@ -15,8 +15,8 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 6px 12px 0 12px;   /* 略微减小顶部内边距 */
-  gap: 2px;                    /* 区域之间的间隔从5px调小到2px */
+  padding: 6px 12px 0 12px;
+  gap: 2px;
   position: relative;
 }
 
@@ -25,12 +25,12 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;                    /* 宠物、气泡、按钮栏之间的间隔调小 */
+  gap: 2px;
   width: 100%;
 }
 
 #bottom-panel {
-  margin-bottom: 8px;          /* 稍微减小底部外边距 */
+  margin-bottom: 8px;
 }
 
 .panel {
@@ -99,53 +99,46 @@ body {
   -webkit-app-region: no-drag;
 }
 
-/* 宠物区宽度改为180px，高度同步增加 */
 #pet {
   width: 180px;
   height: 180px;
-  border-radius: 0;            /* 完全透明无背景，去掉圆角 */
+  border-radius: 0;
   background-color: transparent;
   box-shadow: none;
   cursor: pointer;
   user-select: none;
   pointer-events: auto;
   -webkit-app-region: no-drag;
-  margin-top: 2px;             /* 微调顶部间距 */
+  margin-top: 2px;
 }
 
-/* 精灵图基础样式 */
 .pet-sprite {
   background-repeat: no-repeat;
   background-position: center;
-  background-size: contain;    /* 保证图片完整显示，不裁剪 */
+  background-size: contain;
 }
 
-/* 闲置状态：单帧静态图 */
 .pet-sprite.idle {
   background-image: url('./assets/idle.png');
-  background-size: 180px 180px;  /* 适配新尺寸 */
+  background-size: 180px 180px;
 }
 
-/* 开心动画：13帧，总宽1950px，每帧150px -> 但宠物宽180px，需要重新计算？ */
-/* 注意：你的happy.png是1950x150，每帧150x150，现在宠物宽180px，如果直接拉伸会变形 */
-/* 解决方案：保持背景图原始比例，使用background-size: contain，让图片等比例缩放，但动画移动距离也需要按比例调整 */
-/* 或者重新生成适配180px宽的精灵图。为简化，这里保持图片原始尺寸，但背景位置移动距离按比例换算 */
-/* 下面的CSS假设你的happy.png仍是1950x150，每帧150px，但显示区域180px，背景图会被缩放 */
-/* 更精确的做法：background-size: auto 180px; 然后移动距离 = 180 * 13 = 2340px，但图片宽度只有1950，会露白 */
-/* 因此建议重新生成180px宽的精灵图，或者接受图片被拉伸。这里提供一种兼容写法：让背景图高度填满，宽度自适应，但移动距离按比例计算 */
-/* 由于你的精灵图每帧150px，显示180px，缩放比 = 180/150 = 1.2，总移动距离应为 1950 * 1.2 = 2340px */
 .pet-sprite.happy {
   background-image: url('./assets/happy.png');
-  background-size: auto 180px;   /* 高度填满180px，宽度等比缩放（实际宽度 = 1950 * 1.2 = 2340px） */
+  background-size: auto 180px;
   animation: happyAnim 2.0s steps(13) forwards;
+}
+
+/* 鼓掌：仅提供背景图，由 JS 控制播放 */
+.pet-sprite.clap {
+  background-image: url('./assets/clap.png');
+  /* 不写 animation，background-size 由 JS 强制设为 auto 180px */
 }
 
 @keyframes happyAnim {
   0%   { background-position: 0 0; }
-  100% { background-position: -2340px 0; }  /* 总移动距离 = 每帧宽(150)*缩放比1.2*13帧 = 2340px */
+  100% { background-position: -2340px 0; }
 }
-
-/* 如果你的happy.png已经是180px高的版本，请相应调整background-size和移动距离 */
 
 #pet-status {
   display: none;
@@ -263,7 +256,6 @@ body {
   background: rgba(255, 255, 255, 1);
 }
 
-/* 右键菜单样式 */
 .status-context-menu {
   position: fixed;
   background: rgba(0, 0, 0, 0.8);
@@ -284,7 +276,6 @@ body {
   margin: 4px 0;
 }
 
-/* 模态框背景透明 */
 .modal {
   position: fixed;
   top: 0;
