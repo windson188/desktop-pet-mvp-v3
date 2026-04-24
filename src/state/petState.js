@@ -9,7 +9,7 @@ export function createPetState(initialPet) {
     emotion: initialPet?.emotion ?? 'idle'   // 新增：当前情绪/动作状态
   };
 
-  let decayInterval = null;
+  let decayIntervals = [];
 
   const randomLines = [
     "今天也要努力呀",
@@ -69,18 +69,18 @@ export function createPetState(initialPet) {
   }
 
   function startDecayTimer() {
-    if (decayInterval) clearInterval(decayInterval);
-    setInterval(() => {
+    stopDecayTimer();
+    decayIntervals.push(setInterval(() => {
       decreaseEnergy(1);
-    }, 3600000);
-    setInterval(() => {
+    }, 3600000));
+    decayIntervals.push(setInterval(() => {
       decreaseMood(1);
-    }, 7200000);
+    }, 7200000));
   }
 
   function stopDecayTimer() {
-    if (decayInterval) clearInterval(decayInterval);
-    decayInterval = null;
+    decayIntervals.forEach((intervalId) => clearInterval(intervalId));
+    decayIntervals = [];
   }
 
   function applyReminderEffect() {

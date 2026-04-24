@@ -17,7 +17,20 @@ let clickCount = 0;
 let bubbleCycleTimer = null;
 let isBubbleCycleRunning = false;
 let resetPendingTimer = null;
-let reminderTimeouts = [];
+const reminderTimeouts = new Map();
+
+function clearReminderTimeout(reminderId) {
+  const timeoutId = reminderTimeouts.get(reminderId);
+  if (timeoutId) {
+    clearTimeout(timeoutId);
+    reminderTimeouts.delete(reminderId);
+  }
+}
+
+function clearAllReminderTimeouts() {
+  reminderTimeouts.forEach((timeoutId) => clearTimeout(timeoutId));
+  reminderTimeouts.clear();
+}
 
 // ---------- 自定义模态框（用于编辑）----------
 function showEditDialog(title, defaultValue = '') {
@@ -240,6 +253,7 @@ function renderAll() {
 }
 
 function scheduleReminder(reminder) {
+  clearReminderTimeout(reminder.id);
   const now = Date.now();
   const delay = reminder.time - now;
   const executeReminder = () => {
@@ -261,10 +275,9 @@ function scheduleReminder(reminder) {
   } else {
     const timeoutId = setTimeout(() => {
       executeReminder();
-      const index = reminderTimeouts.indexOf(timeoutId);
-      if (index !== -1) reminderTimeouts.splice(index, 1);
+      reminderTimeouts.delete(reminder.id);
     }, delay);
-    reminderTimeouts.push(timeoutId);
+    reminderTimeouts.set(reminder.id, timeoutId);
   }
 }
 
@@ -489,8 +502,7 @@ async function init() {
     window.addEventListener('beforeunload', () => {
       petState.stopDecayTimer();
       stopBubbleCycle();
-      reminderTimeouts.forEach(id => clearTimeout(id));
-      reminderTimeouts = [];
+      clearAllReminderTimeouts();
     });
 
     await updateWindowHeight();
