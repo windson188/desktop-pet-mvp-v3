@@ -19,6 +19,25 @@ let isBubbleCycleRunning = false;
 let resetPendingTimer = null;
 const reminderTimeouts = new Map();
 
+// ---------- 防抖持久化 ----------
+let persistTimer = null;
+const PERSIST_DELAY = 500;
+
+function debouncedPersist() {
+  if (persistTimer) clearTimeout(persistTimer);
+  persistTimer = setTimeout(() => {
+    const state = {
+      pet: petState.getState(),
+      todos: todoState.getState(),
+      reminders: reminderState.getState(),
+      ui: uiState.getState(),
+      window: { x: null, y: null }
+    };
+    // 直接调用，saveState 内部已经捕获异常，不需要 catch
+    window.desktopPetAPI.saveState(state);
+  }, PERSIST_DELAY);
+}
+
 function clearReminderTimeout(reminderId) {
   const timeoutId = reminderTimeouts.get(reminderId);
   if (timeoutId) {
@@ -32,7 +51,7 @@ function clearAllReminderTimeouts() {
   reminderTimeouts.clear();
 }
 
-// ---------- 自定义模态框（用于编辑）----------
+// ---------- 编辑对话框 ----------
 function showEditDialog(title, defaultValue = '') {
   return new Promise((resolve) => {
     const modal = document.getElementById('edit-modal');
@@ -42,7 +61,7 @@ function showEditDialog(title, defaultValue = '') {
     const cancelBtn = document.getElementById('modal-cancel');
 
     if (!modal) {
-      console.error('模态框元素未找到，请确保 index.html 中包含 #edit-modal');
+      console.error('模态框元素未找到');
       resolve(null);
       return;
     }
@@ -81,7 +100,6 @@ function showEditDialog(title, defaultValue = '') {
   });
 }
 
-// 挂载到全局，供其他模块调用
 window.showEditDialog = showEditDialog;
 
 // ---------- 气泡控制 ----------
@@ -131,7 +149,7 @@ function startBubbleCycle() {
   }, showDuration);
 }
 
-function resetBubbleCycle() {
+export function resetBubbleCycle() {
   if (!petState) return;
   if (resetPendingTimer) clearTimeout(resetPendingTimer);
   stopBubbleCycle();
@@ -145,35 +163,6 @@ function resetBubbleCycle() {
   }, 5000);
 }
 
-async function persist() {
-  const state = {
-    pet: petState.getState(),
-    todos: todoState.getState(),
-    reminders: reminderState.getState(),
-    ui: uiState.getState(),
-    window: { x: null, y: null }
-  };
-  await window.desktopPetAPI.saveState(state);
-}
-
-function updateInputArea() {
-  setupInputController({
-    uiState,
-    todoState,
-    reminderState,
-    onStateChange: () => {
-      persist().then(() => {
-        renderAll();
-        updateWindowHeight().then(() => {
-          if (uiState.getActivePanel()) {
-            repositionActivePanel(uiState);
-          }
-        });
-      });
-    }
-  });
-}
-
 function renderAll() {
   renderPet({ petState, uiState });
   renderTodos({
@@ -181,27 +170,24 @@ function renderAll() {
     onCompleteTodo: (id, text) => {
       todoState.completeTodo(id);
       petState.setBubble(`主人，你真棒，又完成${text}了哦！`);
-      persist().then(() => {
-        renderAll();
-        updateWindowHeight();
-        resetBubbleCycle();
-      });
+      debouncedPersist();
+      renderAll();
+      updateWindowHeight();
+      resetBubbleCycle();
     },
     onDeleteTodo: (id) => {
       todoState.deleteTodo(id);
-      persist().then(() => {
-        renderAll();
-        updateWindowHeight();
-        resetBubbleCycle();
-      });
+      debouncedPersist();
+      renderAll();
+      updateWindowHeight();
+      resetBubbleCycle();
     },
     onEditTodo: (id, newText) => {
       todoState.editTodo(id, newText);
-      persist().then(() => {
-        renderAll();
-        updateWindowHeight();
-        resetBubbleCycle();
-      });
+      debouncedPersist();
+      renderAll();
+      updateWindowHeight();
+      resetBubbleCycle();
     }
   });
   renderReminders({
@@ -209,39 +195,49 @@ function renderAll() {
     completedTodos: todoState.getCompletedTodos(),
     onDeleteReminder: (id) => {
       reminderState.deleteReminder(id);
-      persist().then(() => {
-        renderAll();
-        updateWindowHeight();
-        resetBubbleCycle();
-      });
+      debouncedPersist();
+      renderAll();
+      updateWindowHeight();
+      resetBubbleCycle();
     },
     onCompleteReminder: (id, reminderText) => {
       petState.setBubble(`主人，你真棒，又完成${reminderText}了哦！`);
       reminderState.completeReminder(id);
-      persist().then(() => {
-        renderAll();
-        updateWindowHeight();
-        resetBubbleCycle();
-      });
+      debouncedPersist();
+      renderAll();
+      updateWindowHeight();
+      resetBubbleCycle();
     },
     onDeleteCompletedTodo: (id) => {
       todoState.deleteCompletedTodo(id);
-      persist().then(() => {
-        renderAll();
-        updateWindowHeight();
-        resetBubbleCycle();
-      });
+      debouncedPersist();
+      renderAll();
+      updateWindowHeight();
+      resetBubbleCycle();
     },
     onEditReminder: (id, newText) => {
       reminderState.editReminder(id, newText);
-      persist().then(() => {
-        renderAll();
-        updateWindowHeight();
-        resetBubbleCycle();
+      debouncedPersist();
+      renderAll();
+      updateWindowHeight();
+      resetBubbleCycle();
+    }
+  });
+
+  setupInputController({
+    uiState,
+    todoState,
+    reminderState,
+    onStateChange: () => {
+      debouncedPersist();
+      renderAll();
+      updateWindowHeight().then(() => {
+        if (uiState.getActivePanel()) {
+          repositionActivePanel(uiState);
+        }
       });
     }
   });
-  updateInputArea();
 
   if (uiState.getActivePanel()) {
     requestAnimationFrame(() => {
@@ -258,17 +254,15 @@ function scheduleReminder(reminder) {
   const delay = reminder.time - now;
   const executeReminder = () => {
     petState.setBubble(`主人，记得要${reminder.text}哦！`);
-    renderAll();
     showBubble();
     updateWindowHeight();
     resetBubbleCycle();
     petState.applyReminderEffect();
     reminderState.completeReminder(reminder.id);
-    persist().then(() => {
-      renderAll();
-      updateWindowHeight();
-      resetBubbleCycle();
-    });
+    debouncedPersist();
+    renderAll();
+    updateWindowHeight();
+    resetBubbleCycle();
   };
   if (delay <= 0) {
     executeReminder();
@@ -301,11 +295,10 @@ function bindEvents() {
     }
     petState.feed();
     uiState.wakeUp();
-    persist().then(() => {
-      renderAll();
-      updateWindowHeight();
-      resetBubbleCycle();
-    });
+    debouncedPersist();
+    renderAll();
+    updateWindowHeight();
+    resetBubbleCycle();
   });
 
   petBtn?.addEventListener("click", () => {
@@ -317,11 +310,10 @@ function bindEvents() {
     }
     petState.setEmotion('happy');
     uiState.wakeUp();
-    persist().then(() => {
-      renderAll();
-      updateWindowHeight();
-      resetBubbleCycle();
-    });
+    debouncedPersist();
+    renderAll();
+    updateWindowHeight();
+    resetBubbleCycle();
   });
 
   todoBtn?.addEventListener("click", () => {
@@ -350,16 +342,12 @@ function bindEvents() {
     resetBubbleCycle();
   });
 
-pet?.addEventListener("click", () => {
-    // 如果正处于拖动模式或拖动刚结束后的禁止期，则不唤醒
+  pet?.addEventListener("click", () => {
     if (window._disablePetClick) return;
-
-    // 原有的 dragJustHappened 判断可以保留
     if (dragJustHappened) {
       dragJustHappened = false;
       return;
     }
-    // ... 其余代码保持不变
     if (uiState.getActivePanel() || uiState.getActiveInput()) {
       uiState.setActivePanel(null);
       uiState.closeInput();
@@ -374,11 +362,10 @@ pet?.addEventListener("click", () => {
       petState.addClickBond();
       clickCount = 0;
     }
-    persist().then(() => {
-      renderAll();
-      updateWindowHeight();
-      resetBubbleCycle();
-    });
+    debouncedPersist();
+    renderAll();
+    updateWindowHeight();
+    resetBubbleCycle();
   });
 
   pet?.addEventListener("contextmenu", (e) => {
@@ -453,7 +440,7 @@ async function init() {
     uiState.sleep();
     uiState.setActivePanel(null);
 
-    const { x, y } = appState.window;
+    const { x, y } = appState.window || {};
     if (typeof x === 'number' && typeof y === 'number' && !isNaN(x) && !isNaN(y)) {
       await window.desktopPetAPI.setWindowPosition(x, y);
     }
@@ -478,7 +465,7 @@ async function init() {
         if (moved) {
           const currentState = window.desktopPetAPI.loadState();
           currentState.window = { x: pos.x, y: pos.y };
-          await window.desktopPetAPI.saveState(currentState);
+          window.desktopPetAPI.saveState(currentState);
         }
       }
     });
@@ -503,6 +490,14 @@ async function init() {
       petState.stopDecayTimer();
       stopBubbleCycle();
       clearAllReminderTimeouts();
+      const state = {
+        pet: petState.getState(),
+        todos: todoState.getState(),
+        reminders: reminderState.getState(),
+        ui: uiState.getState(),
+        window: { x: null, y: null }
+      };
+      window.desktopPetAPI.saveState(state);
     });
 
     await updateWindowHeight();
