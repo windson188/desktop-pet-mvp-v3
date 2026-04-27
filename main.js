@@ -138,8 +138,10 @@ app.whenReady().then(() => {
 
   ipcMain.handle("window:resizeTo", (_, newHeight) => {
     if (!mainWindow) return;
+    const parsed = Number(newHeight);
+    if (isNaN(parsed)) return;
+    const safeHeight = Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, Math.round(parsed)));
     const [currentWidth, currentHeight] = mainWindow.getSize();
-    const safeHeight = Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, Math.round(newHeight)));
     const [currentX, currentY] = mainWindow.getPosition();
     const diff = safeHeight - currentHeight;
     let newY = currentY - diff;
@@ -162,10 +164,14 @@ app.whenReady().then(() => {
     const [x, y] = mainWindow.getPosition();
     return { x, y };
   });
-ipcMain.handle("window:setPosition", (_, x, y) => {
-  if (!mainWindow) return;
-  mainWindow.setPosition(Math.round(x), Math.round(y));
-});
+
+  ipcMain.handle("window:setPosition", (_, x, y) => {
+    if (!mainWindow) return;
+    const numX = Number(x);
+    const numY = Number(y);
+    if (isNaN(numX) || isNaN(numY)) return;
+    mainWindow.setPosition(Math.round(numX), Math.round(numY));
+  });
 });
 
 app.on("window-all-closed", () => {
