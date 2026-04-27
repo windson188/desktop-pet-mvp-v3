@@ -147,6 +147,11 @@ body {
   background-size: auto 180px;
 }
 
+/* 吃动画：由 JS 驱动，见 eatAnimation.js */
+.pet-sprite.eat {
+  background-image: url('./assets/eat.png');
+}
+
 #pet-status {
   display: none;
 }

@@ -1,5 +1,6 @@
 // src/ui/renderPet.js
 import { startClapAnimation, stopClapAnimation } from './clapAnimation.js';
+import { startEatAnimation, stopEatAnimation, isEatAnimating } from './eatAnimation.js';
 
 export function renderPet({ petState, uiState }) {
   const petEl = document.getElementById("pet");
@@ -12,27 +13,33 @@ export function renderPet({ petState, uiState }) {
 
   if (petEl) {
     const currentEmotion = petState.getEmotion();
-    petEl.classList.remove('idle', 'happy', 'clap');
+    petEl.classList.remove('idle', 'happy', 'clap', 'eat'); // 移除所有情绪类
 
     if (currentEmotion === 'clap') {
-      // 鼓掌动画由 JS 驱动，每次重新开始
+      // 鼓掌动画由 JS 驱动
       startClapAnimation(petEl, petState, () => renderPet({ petState, uiState }));
-      petEl.classList.add('clap');   // 仅用于设置背景图路径
+      petEl.classList.add('clap');
+    } else if (currentEmotion === 'eat') {
+      // 吃动画由 JS 驱动，已在播放则不再重复启动
+      if (!isEatAnimating()) {
+        startEatAnimation(petEl, petState, () => renderPet({ petState, uiState }));
+      }
+      petEl.classList.add('eat');
     } else {
-      // 停止可能残留的鼓掌动画
       stopClapAnimation();
+      stopEatAnimation();
 
-      // 清除 JS 动画留下的内联样式，让 CSS 控制背景尺寸和位置
+      // 清除 JS 内联的背景样式，任由 CSS 控制
       petEl.style.backgroundSize = '';
       petEl.style.backgroundPosition = '';
+      petEl.style.backgroundImage = '';
 
-      // 添加当前情绪类（idle 或 happy）
       petEl.classList.add(currentEmotion);
 
-      // happy 动画结束后自动恢复 idle
+      // CSS 动画结束后自动恢复 idle（happy 等）
       if (currentEmotion === 'happy') {
         const onAnimEnd = () => {
-          if (petState.getEmotion() === 'happy') {
+          if (petState.getEmotion() === currentEmotion) {
             petState.setEmotion('idle');
             renderPet({ petState, uiState });
           }
@@ -43,7 +50,7 @@ export function renderPet({ petState, uiState }) {
     }
   }
 
-  // 底部按钮栏和面板显隐控制（与之前完全一致）
+  // 底部按钮栏和面板显隐控制
   if (uiState.getIsAwake()) {
     bottomPanel.classList.remove("hidden");
     bottomPanel.style.display = 'flex';

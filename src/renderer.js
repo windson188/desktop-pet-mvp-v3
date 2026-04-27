@@ -181,6 +181,7 @@ function renderAll() {
     onCompleteTodo: (id, text) => {
       todoState.completeTodo(id);
       petState.setBubble(`主人，你真棒，又完成${text}了哦！`);
+      petState.setEmotion('clap');
       persist().then(() => {
         renderAll();
         updateWindowHeight();
@@ -300,6 +301,7 @@ function bindEvents() {
       updateWindowHeight();
     }
     petState.feed();
+    petState.setEmotion('eat');
     uiState.wakeUp();
     persist().then(() => {
       renderAll();
