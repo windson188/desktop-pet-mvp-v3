@@ -12,12 +12,12 @@ export function renderPet({ petState, uiState }) {
   // 更新宠物的 CSS 类（基于 emotion）
   if (petEl) {
     const currentEmotion = petState.getEmotion();
-    petEl.classList.remove('idle', 'happy');
+    petEl.classList.remove('idle', 'happy', 'clap');
     petEl.classList.add(currentEmotion);
 
-    if (currentEmotion === 'happy') {
+    if (currentEmotion === 'happy' || currentEmotion === 'clap') {
       const onAnimEnd = () => {
-        if (petState.getEmotion() === 'happy') {
+        if (petState.getEmotion() === currentEmotion) {
           petState.setEmotion('idle');
           renderPet({ petState, uiState });
         }

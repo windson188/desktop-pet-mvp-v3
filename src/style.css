@@ -142,10 +142,14 @@ body {
 
 @keyframes happyAnim {
   0%   { background-position: 0 0; }
-  100% { background-position: -2340px 0; }  /* 总移动距离 = 每帧宽(150)*缩放比1.2*13帧 = 2340px */
+  100% { background-position: -2340px 0; }
 }
 
-/* 如果你的happy.png已经是180px高的版本，请相应调整background-size和移动距离 */
+/* 鼓掌动画：由 JS 驱动自定义帧序列，见 renderPet.js */
+.pet-sprite.clap {
+  background-image: url('./assets/clap.png');
+  background-size: auto 180px;
+}
 
 #pet-status {
   display: none;

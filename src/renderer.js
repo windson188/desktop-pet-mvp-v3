@@ -1,4 +1,4 @@
-// src/renderer.js
+﻿// src/renderer.js
 import { createPetState } from './state/petState.js';
 import { createTodoState } from './state/todoState.js';
 import { createReminderState } from './state/reminderState.js';
@@ -180,6 +180,7 @@ function renderAll() {
     todoState,
     onCompleteTodo: (id, text) => {
       todoState.completeTodo(id);
+      petState.setEmotion("clap");
       petState.setBubble(`主人，你真棒，又完成${text}了哦！`);
       persist().then(() => {
         renderAll();

@@ -1,0 +1,59 @@
+Git回退步骤：
+打开终端（项目根目录下）
+
+查看提交历史：
+
+bash
+git log --oneline
+找到你最后一次正常工作的提交的哈希值（例如 abc1234）。
+
+回退到该版本：
+
+bash
+git reset --hard <commit-hash>
+例如：git reset --hard abc1234
+
+强制推送（如果已经推送到远程仓库）：
+
+bash
+git push --force origin main
+重新启动应用：
+
+bash
+npm start
+
+
+
+
+
+同步Git
+cd J:\desktop-pet-mvp-v3
+git pull origin dev
+
+
+
+
+推送到Git
+
+进入项目目录。
+
+查看更改（可选）：
+
+bash
+git status
+添加所有修改：
+
+bash
+git add .
+提交（注意双引号）：
+
+bash
+git commit -m "fix: 修复宠物点击唤醒和拖拽后误唤醒的问题"
+推送：
+
+bash
+git push origin dev （如果是要推送到main，就要把dev改成main）
+
+
+
+
