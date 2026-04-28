@@ -10,140 +10,14 @@ import { renderPet, repositionActivePanel } from './ui/renderPet.js';
 import { renderTodos } from './ui/renderTodos.js';
 import { renderReminders } from './ui/renderReminders.js';
 import { updateWindowHeight } from './window/resizeController.js';
+import { showBubble, hideBubble, startBubbleCycle, resetBubbleCycle } from './ui/bubbleController.js';
+import { showEditDialog } from './ui/modalController.js';
+import { scheduleReminder, clearAllReminderTimeouts } from './state/reminderScheduler.js';
 
 let petState, todoState, reminderState, uiState;
 let clickCount = 0;
 
-let bubbleCycleTimer = null;
-let isBubbleCycleRunning = false;
-let resetPendingTimer = null;
-const reminderTimeouts = new Map();
-
-function clearReminderTimeout(reminderId) {
-  const timeoutId = reminderTimeouts.get(reminderId);
-  if (timeoutId) {
-    clearTimeout(timeoutId);
-    reminderTimeouts.delete(reminderId);
-  }
-}
-
-function clearAllReminderTimeouts() {
-  reminderTimeouts.forEach((timeoutId) => clearTimeout(timeoutId));
-  reminderTimeouts.clear();
-}
-
-// ---------- 自定义模态框（用于编辑）----------
-function showEditDialog(title, defaultValue = '') {
-  return new Promise((resolve) => {
-    const modal = document.getElementById('edit-modal');
-    const modalTitle = document.getElementById('modal-title');
-    const input = document.getElementById('modal-input');
-    const confirmBtn = document.getElementById('modal-confirm');
-    const cancelBtn = document.getElementById('modal-cancel');
-
-    if (!modal) {
-      console.error('模态框元素未找到，请确保 index.html 中包含 #edit-modal');
-      resolve(null);
-      return;
-    }
-
-    modalTitle.textContent = title;
-    input.value = defaultValue;
-    modal.classList.remove('hidden');
-
-    const cleanup = () => {
-      modal.classList.add('hidden');
-      confirmBtn.removeEventListener('click', onConfirm);
-      cancelBtn.removeEventListener('click', onCancel);
-      input.removeEventListener('keypress', onKeyPress);
-    };
-
-    const onConfirm = () => {
-      const value = input.value.trim();
-      cleanup();
-      resolve(value === '' ? null : value);
-    };
-
-    const onCancel = () => {
-      cleanup();
-      resolve(null);
-    };
-
-    const onKeyPress = (e) => {
-      if (e.key === 'Enter') onConfirm();
-    };
-
-    confirmBtn.addEventListener('click', onConfirm);
-    cancelBtn.addEventListener('click', onCancel);
-    input.addEventListener('keypress', onKeyPress);
-    input.focus();
-    input.select();
-  });
-}
-
-// 挂载到全局，供其他模块调用
 window.showEditDialog = showEditDialog;
-
-// ---------- 气泡控制 ----------
-function getBubbleElement() {
-  return document.getElementById("bubble");
-}
-
-function showBubble() {
-  const bubble = getBubbleElement();
-  if (bubble) bubble.classList.remove("hidden");
-}
-
-function hideBubble() {
-  const bubble = getBubbleElement();
-  if (bubble) bubble.classList.add("hidden");
-}
-
-function stopBubbleCycle() {
-  if (bubbleCycleTimer) {
-    clearTimeout(bubbleCycleTimer);
-    bubbleCycleTimer = null;
-  }
-  if (resetPendingTimer) {
-    clearTimeout(resetPendingTimer);
-    resetPendingTimer = null;
-  }
-  isBubbleCycleRunning = false;
-}
-
-function startBubbleCycle() {
-  if (!petState) return;
-  if (isBubbleCycleRunning) stopBubbleCycle();
-  isBubbleCycleRunning = true;
-
-  const randomText = petState.getRandomLine();
-  petState.setBubble(randomText);
-  renderAll();
-  showBubble();
-
-  const showDuration = Math.floor(Math.random() * (15000 - 10000 + 1) + 10000);
-  bubbleCycleTimer = setTimeout(() => {
-    hideBubble();
-    const hideDuration = Math.floor(Math.random() * (45000 - 35000 + 1) + 35000);
-    bubbleCycleTimer = setTimeout(() => {
-      startBubbleCycle();
-    }, hideDuration);
-  }, showDuration);
-}
-
-function resetBubbleCycle() {
-  if (!petState) return;
-  if (resetPendingTimer) clearTimeout(resetPendingTimer);
-  stopBubbleCycle();
-  const currentBubble = petState.getBubble();
-  if (currentBubble && currentBubble.trim() !== '') {
-    showBubble();
-  }
-  resetPendingTimer = setTimeout(() => {
-    resetPendingTimer = null;
-    startBubbleCycle();
-  }, 5000);
-}
 
 async function persist() {
   const state = {
@@ -185,7 +59,7 @@ function renderAll() {
       persist().then(() => {
         renderAll();
         updateWindowHeight();
-        resetBubbleCycle();
+        resetBubbleCycle({ petState, renderAll });
       });
     },
     onDeleteTodo: (id) => {
@@ -193,7 +67,7 @@ function renderAll() {
       persist().then(() => {
         renderAll();
         updateWindowHeight();
-        resetBubbleCycle();
+        resetBubbleCycle({ petState, renderAll });
       });
     },
     onEditTodo: (id, newText) => {
@@ -201,7 +75,7 @@ function renderAll() {
       persist().then(() => {
         renderAll();
         updateWindowHeight();
-        resetBubbleCycle();
+        resetBubbleCycle({ petState, renderAll });
       });
     }
   });
@@ -213,7 +87,7 @@ function renderAll() {
       persist().then(() => {
         renderAll();
         updateWindowHeight();
-        resetBubbleCycle();
+        resetBubbleCycle({ petState, renderAll });
       });
     },
     onCompleteReminder: (id, reminderText) => {
@@ -222,7 +96,7 @@ function renderAll() {
       persist().then(() => {
         renderAll();
         updateWindowHeight();
-        resetBubbleCycle();
+        resetBubbleCycle({ petState, renderAll });
       });
     },
     onDeleteCompletedTodo: (id) => {
@@ -230,7 +104,7 @@ function renderAll() {
       persist().then(() => {
         renderAll();
         updateWindowHeight();
-        resetBubbleCycle();
+        resetBubbleCycle({ petState, renderAll });
       });
     },
     onEditReminder: (id, newText) => {
@@ -238,7 +112,7 @@ function renderAll() {
       persist().then(() => {
         renderAll();
         updateWindowHeight();
-        resetBubbleCycle();
+        resetBubbleCycle({ petState, renderAll });
       });
     }
   });
@@ -250,35 +124,6 @@ function renderAll() {
         repositionActivePanel(uiState);
       });
     });
-  }
-}
-
-function scheduleReminder(reminder) {
-  clearReminderTimeout(reminder.id);
-  const now = Date.now();
-  const delay = reminder.time - now;
-  const executeReminder = () => {
-    petState.setBubble(`主人，记得要${reminder.text}哦！`);
-    renderAll();
-    showBubble();
-    updateWindowHeight();
-    resetBubbleCycle();
-    petState.applyReminderEffect();
-    reminderState.completeReminder(reminder.id);
-    persist().then(() => {
-      renderAll();
-      updateWindowHeight();
-      resetBubbleCycle();
-    });
-  };
-  if (delay <= 0) {
-    executeReminder();
-  } else {
-    const timeoutId = setTimeout(() => {
-      executeReminder();
-      reminderTimeouts.delete(reminder.id);
-    }, delay);
-    reminderTimeouts.set(reminder.id, timeoutId);
   }
 }
 
@@ -306,7 +151,7 @@ function bindEvents() {
     persist().then(() => {
       renderAll();
       updateWindowHeight();
-      resetBubbleCycle();
+      resetBubbleCycle({ petState, renderAll });
     });
   });
 
@@ -322,7 +167,7 @@ function bindEvents() {
     persist().then(() => {
       renderAll();
       updateWindowHeight();
-      resetBubbleCycle();
+      resetBubbleCycle({ petState, renderAll });
     });
   });
 
@@ -336,7 +181,7 @@ function bindEvents() {
     uiState.wakeUp();
     renderAll();
     updateWindowHeight();
-    resetBubbleCycle();
+    resetBubbleCycle({ petState, renderAll });
   });
 
   reminderBtn?.addEventListener("click", () => {
@@ -349,7 +194,7 @@ function bindEvents() {
     uiState.wakeUp();
     renderAll();
     updateWindowHeight();
-    resetBubbleCycle();
+    resetBubbleCycle({ petState, renderAll });
   });
 
 pet?.addEventListener("click", () => {
@@ -379,7 +224,7 @@ pet?.addEventListener("click", () => {
     persist().then(() => {
       renderAll();
       updateWindowHeight();
-      resetBubbleCycle();
+      resetBubbleCycle({ petState, renderAll });
     });
   });
 
@@ -437,7 +282,7 @@ pet?.addEventListener("click", () => {
         renderAll();
         updateWindowHeight();
         e.preventDefault();
-        resetBubbleCycle();
+        resetBubbleCycle({ petState, renderAll });
       }
     }
   });
@@ -470,7 +315,7 @@ async function init() {
       onHide: () => {
         renderAll();
         updateWindowHeight();
-        resetBubbleCycle();
+        resetBubbleCycle({ petState, renderAll });
       }
     });
 
@@ -494,8 +339,17 @@ async function init() {
     });
 
     const reminders = reminderState.getReminders();
-    reminders.forEach(rem => scheduleReminder(rem));
-    window.scheduleReminder = scheduleReminder;
+    const schedulerDeps = {
+      petState,
+      reminderState,
+      renderAll: () => renderAll(),
+      showBubble,
+      resetBubbleCycle: (opts) => resetBubbleCycle(opts || { petState, renderAll: () => renderAll() }),
+      persist: () => persist(),
+      updateWindowHeight: () => updateWindowHeight()
+    };
+    reminders.forEach(rem => scheduleReminder(rem, schedulerDeps));
+    window.scheduleReminder = (rem) => scheduleReminder(rem, schedulerDeps);
 
     bindEvents();
 
@@ -516,7 +370,7 @@ async function init() {
       hideBubble();
       const initialHideDuration = Math.floor(Math.random() * (20000 - 15000 + 1) + 15000);
       setTimeout(() => {
-        startBubbleCycle();
+        startBubbleCycle({ petState, renderAll: () => renderAll() });
       }, initialHideDuration);
     }, 10000);
   } catch (err) {
