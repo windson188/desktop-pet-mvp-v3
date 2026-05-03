@@ -92,7 +92,7 @@ export function createPetState(initialPet) {
 
   // ========== 情绪/动作管理 ==========
   function setEmotion(emo) {
-    const valid = ['idle', 'happy', 'clap', 'eat'];
+    const valid = ['idle', 'happy', 'clap', 'eat', 'yoyo'];
     if (valid.includes(emo)) {
       state.emotion = emo;
     }
