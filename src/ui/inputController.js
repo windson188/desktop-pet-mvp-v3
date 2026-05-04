@@ -1,5 +1,4 @@
-// src/ui/inputController.js
-let currentInputType = null; // 缓存当前激活的输入框类型
+let currentInputType = null;
 
 export function setupInputController({
   uiState,
@@ -10,7 +9,6 @@ export function setupInputController({
   const inputArea = document.getElementById("input-area");
   const activeInput = uiState.getActiveInput();
 
-  // 如果没有激活的输入框，隐藏并清空内容
   if (!activeInput) {
     inputArea.classList.add("hidden");
     inputArea.innerHTML = "";
@@ -18,11 +16,9 @@ export function setupInputController({
     return;
   }
 
-  // 如果当前输入框已经存在且类型相同，则只做定位，不重新创建
   if (currentInputType === activeInput && !inputArea.classList.contains("hidden")) {
-    // 仅更新位置
-    requestAnimationFrame(() => {
-      const buttonBar = document.getElementById("bottom-panel");
+          requestAnimationFrame(() => {
+        const buttonBar = document.getElementById("bottom-panel");
       if (buttonBar) {
         const buttonRect = buttonBar.getBoundingClientRect();
         const appEl = document.getElementById("app");
@@ -41,11 +37,9 @@ export function setupInputController({
     return;
   }
 
-  // 否则，重新创建输入框内容
-  currentInputType = activeInput;
+    currentInputType = activeInput;
   inputArea.classList.remove("hidden");
 
-  // 根据类型渲染内容
   if (activeInput === "todo") {
     inputArea.innerHTML = `
       <div class="input-row">
@@ -135,7 +129,6 @@ export function setupInputController({
     reminderText.focus();
   }
 
-  // 定位输入框
   requestAnimationFrame(() => {
     const buttonBar = document.getElementById("bottom-panel");
     if (buttonBar) {

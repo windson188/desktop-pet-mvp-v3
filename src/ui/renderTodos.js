@@ -22,9 +22,8 @@ export function renderTodos({ todoState, onCompleteTodo, onDeleteTodo, onEditTod
     textSpan.style.cursor = "pointer";
     textSpan.style.flex = "1";
     textSpan.textContent = item.text;
-    textSpan.setAttribute("data-id", item.id);
+        textSpan.setAttribute("data-id", item.id);
 
-    // 双击编辑
     textSpan.addEventListener("dblclick", async (e) => {
       e.stopPropagation();
       const newText = await window.showEditDialog('编辑待办事项', item.text);

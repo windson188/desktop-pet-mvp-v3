@@ -1,4 +1,3 @@
-// src/ui/renderPet.js
 import { startClapAnimation, stopClapAnimation } from './clapAnimation.js';
 import { startEatAnimation, stopEatAnimation, isEatAnimating } from './eatAnimation.js';
 import { startYoyoAnimation, stopYoyoAnimation, isYoyoAnimating, startIdleYoyoCheck, stopIdleCheck } from './yoyoAnimation.js';
@@ -14,24 +13,19 @@ export function renderPet({ petState, uiState }) {
 
   if (petEl) {
     const currentEmotion = petState.getEmotion();
-    petEl.classList.remove('idle', 'happy', 'clap', 'eat', 'yoyo'); // 移除所有情绪类
+        petEl.classList.remove('idle', 'happy', 'clap', 'eat', 'yoyo');
 
     if (currentEmotion === 'clap') {
-      // 鼓掌动画由 JS 驱动
       startClapAnimation(petEl, petState, () => renderPet({ petState, uiState }));
       petEl.classList.add('clap');
-      // 停止闲置检测（有其他动画时）
       stopIdleCheck();
-    } else if (currentEmotion === 'eat') {
-      // 吃动画由 JS 驱动，已在播放则不再重复启动
+        } else if (currentEmotion === 'eat') {
       if (!isEatAnimating()) {
         startEatAnimation(petEl, petState, () => renderPet({ petState, uiState }));
       }
       petEl.classList.add('eat');
-      // 停止闲置检测
       stopIdleCheck();
-    } else if (currentEmotion === 'yoyo') {
-      // yoyo 动画由 JS 驱动
+        } else if (currentEmotion === 'yoyo') {
       stopClapAnimation();
       stopEatAnimation();
       if (!isYoyoAnimating()) {
@@ -41,16 +35,17 @@ export function renderPet({ petState, uiState }) {
     } else {
       stopClapAnimation();
       stopEatAnimation();
+      if (isYoyoAnimating() || petState.getBubble() === `这招叫'风火轮'，酷不酷？`) {
+        petState.setBubble('');
+      }
       stopYoyoAnimation();
 
-      // 清除 JS 内联的背景样式，任由 CSS 控制
       petEl.style.backgroundSize = '';
       petEl.style.backgroundPosition = '';
       petEl.style.backgroundImage = '';
 
       petEl.classList.add(currentEmotion);
 
-      // CSS 动画结束后自动恢复 idle（happy 等）
       if (currentEmotion === 'happy') {
         const onAnimEnd = () => {
           if (petState.getEmotion() === currentEmotion) {
@@ -62,14 +57,12 @@ export function renderPet({ petState, uiState }) {
         petEl.addEventListener('animationend', onAnimEnd, { once: true });
       }
 
-      // 当回到 idle 状态时，启动闲置轮播检测
       if (currentEmotion === 'idle') {
         startIdleYoyoCheck(petEl, petState, () => renderPet({ petState, uiState }));
       }
     }
   }
 
-  // 底部按钮栏和面板显隐控制
   if (uiState.getIsAwake()) {
     bottomPanel.classList.remove("hidden");
     bottomPanel.style.display = 'flex';
@@ -148,3 +141,4 @@ export function repositionActivePanel(uiState) {
     positionPanel(panel, buttonBar);
   }
 }
+

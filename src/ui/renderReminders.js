@@ -67,7 +67,6 @@ export function renderReminders({
     });
   }
 
-  // 已完成待办部分（折叠）
   const completedSection = document.getElementById("completed-section");
   if (!completedSection) return;
 

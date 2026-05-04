@@ -129,10 +129,8 @@ body {
   animation: happyAnim 2.0s steps(13) forwards;
 }
 
-/* 鼓掌：仅提供背景图，由 JS 控制播放 */
 .pet-sprite.clap {
   background-image: url('./assets/clap.png');
-  /* 不写 animation，background-size 由 JS 强制设为 auto 180px */
 }
 
 @keyframes happyAnim {
@@ -141,13 +139,11 @@ body {
   100% { background-position: -2340px 0; }
 }
 
-/* 鼓掌动画：由 JS 驱动自定义帧序列，见 renderPet.js */
 .pet-sprite.clap {
   background-image: url('./assets/clap.png');
   background-size: auto 180px;
 }
 
-/* 吃动画：由 JS 驱动，见 eatAnimation.js */
 .pet-sprite.eat {
   background-image: url('./assets/eat.png');
 }

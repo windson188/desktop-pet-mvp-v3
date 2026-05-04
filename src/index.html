@@ -8,7 +8,6 @@
 </head>
 <body>
 <div id="app">
-  <!-- 待办面板 -->
   <div id="todo-panel" class="panel hidden">
     <div class="panel-section">
       <div class="section-title" style="display: flex; justify-content: space-between; align-items: center;">
@@ -25,7 +24,6 @@
     </div>
   </div>
 
-  <!-- 提醒面板 -->
   <div id="reminder-panel" class="panel hidden">
     <div class="panel-section">
       <div class="section-title" style="display: flex; justify-content: space-between; align-items: center;">
@@ -36,12 +34,9 @@
     </div>
   </div>
 
-  <!-- 输入区域 -->
   <div id="input-area" class="hidden"></div>
 
-  <!-- 固定区域（始终位于底部） -->
   <div class="fixed-area">
-    <!-- 底部按钮栏 -->
     <div id="bottom-panel" class="panel hidden" >
       <button id="feed-btn">投喂</button>
       <button id="todo-btn">待办</button>
@@ -49,17 +44,14 @@
       <button id="reminder-btn">提醒</button>
     </div>
 
-    <!-- 气泡 -->
     <div id="bubble">戳我一下试试？</div>
 
-    <!-- 宠物主体 -->
     <div id="pet" class="pet-sprite idle"></div>
   </div>
 </div>
 
 <script type="module" src="./renderer.js"></script>
 
-<!-- 自定义编辑模态框 -->
 <div id="edit-modal" class="modal hidden">
   <div class="modal-content">
     <h3 id="modal-title">编辑</h3>

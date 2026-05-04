@@ -1,4 +1,3 @@
-// src/window/resizeController.js
 const MIN_WINDOW_HEIGHT = 280;
 const MAX_WINDOW_HEIGHT = 880;
 

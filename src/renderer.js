@@ -1,4 +1,3 @@
-// src/renderer.js
 import { createPetState } from './state/petState.js';
 import { createTodoState } from './state/todoState.js';
 import { createReminderState } from './state/reminderState.js';
@@ -200,15 +199,12 @@ function bindEvents() {
   });
 
 pet?.addEventListener("click", () => {
-    // 如果正处于拖动模式或拖动刚结束后的禁止期，则不唤醒
     if (window._disablePetClick) return;
 
-    // 原有的 dragJustHappened 判断可以保留
     if (dragJustHappened) {
       dragJustHappened = false;
       return;
     }
-    // ... 其余代码保持不变
     if (uiState.getActivePanel() || uiState.getActiveInput()) {
       uiState.setActivePanel(null);
       uiState.closeInput();

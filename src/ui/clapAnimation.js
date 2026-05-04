@@ -1,10 +1,8 @@
-// src/ui/clapAnimation.js
 
-const FRAME_WIDTH = 180;          // 单帧宽度（px）
-const FRAME_COUNT = 16;           // 总帧数
-const TOTAL_DURATION = 2000;      // 动画总时长（ms）
+const FRAME_WIDTH = 180;
+const FRAME_COUNT = 16;
+const TOTAL_DURATION = 2000;
 
-// 帧序列：第4~7帧额外重复2次（共3次）
 const REPEAT_START = 4;
 const REPEAT_END = 7;
 const EXTRA_REPEATS = 2;
@@ -23,7 +21,6 @@ function buildFrameSequence() {
 }
 
 export function startClapAnimation(petEl, petState, reRender) {
-  // 强制停止任何正在运行的动画，重新开始
   stopClapAnimation();
 
   const sequence = buildFrameSequence();
@@ -31,9 +28,8 @@ export function startClapAnimation(petEl, petState, reRender) {
   const stepInterval = TOTAL_DURATION / stepCount;
 
   let currentStep = 0;
-  isAnimating = true;
+    isAnimating = true;
 
-  // 固定背景尺寸，避免被基类 contain 干扰
   petEl.style.backgroundSize = 'auto 180px';
   updateFrame(petEl, sequence[currentStep]);
 
@@ -42,9 +38,8 @@ export function startClapAnimation(petEl, petState, reRender) {
     if (currentStep >= stepCount) {
       clearInterval(animInterval);
       animInterval = null;
-      isAnimating = false;
+            isAnimating = false;
 
-      // 恢复 idle 并重绘
       petState.setEmotion('idle');
       if (reRender) reRender();
       return;

@@ -1,4 +1,3 @@
-// src/ui/bubbleController.js
 
 let bubbleCycleTimer = null;
 let isBubbleCycleRunning = false;

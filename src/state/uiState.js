@@ -1,7 +1,6 @@
-// src/state/uiState.js
 export function createUIState(initialUI) {
   let state = {
-    isAwake: false,   // 强制初始为 false，确保启动时按钮栏隐藏
+    isAwake: false,
     activeInput: initialUI?.activeInput || null,
     activePanel: initialUI?.activePanel || null
   };

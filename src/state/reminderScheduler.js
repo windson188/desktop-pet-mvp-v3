@@ -1,5 +1,3 @@
-// src/state/reminderScheduler.js
-
 const reminderTimeouts = new Map();
 
 function clearReminderTimeout(reminderId) {
@@ -15,11 +13,6 @@ function clearAllReminderTimeouts() {
   reminderTimeouts.clear();
 }
 
-/**
- * 调度一个提醒任务
- * @param {Object} reminder - { id, text, time }
- * @param {Object} deps - { petState, renderAll, showBubble, resetBubbleCycle, persist, updateWindowHeight }
- */
 function scheduleReminder(reminder, deps) {
   clearReminderTimeout(reminder.id);
   const { petState, reminderState, renderAll, showBubble, resetBubbleCycle, persist, updateWindowHeight } = deps;

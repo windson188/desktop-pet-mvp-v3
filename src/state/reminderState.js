@@ -32,7 +32,7 @@ export function createReminderState(initialState = {}) {
         createdAt: Date.now()
       });
     },
-    // 编辑提醒（仅文本，时间暂不支持）
+
     editReminder(id, newText) {
       if (!newText || !newText.trim()) return;
       const reminder = reminders.find(item => item.id === id);

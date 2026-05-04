@@ -23,14 +23,9 @@ bash
 npm start
 
 
-
-
-
 同步Git
 cd J:\desktop-pet-mvp-v3
 git pull origin dev
-
-
 
 
 推送到Git
@@ -56,4 +51,43 @@ git push origin dev （如果是要推送到main，就要把dev改成main）
 
 
 
+你遇到的错误和之前类似：本地对 src/renderer.js 有未提交的修改，而远程分支的更新也修改了这个文件，Git 无法自动合并，所以阻止了 git pull。
 
+你需要先处理本地的修改，再拉取远程更新。根据你的需求，可以选择以下任一方法：
+
+方案一：提交本地修改（如果修改已完成且需要保留）
+bash
+# 1. 查看修改内容（可选）
+git diff src/renderer.js
+
+# 2. 添加并提交
+git add src/renderer.js
+git commit -m "完成 renderer.js 的修改"
+
+# 3. 拉取远程更新（可能会产生合并冲突）
+git pull origin dev
+
+# 4. 如果有冲突，解决后 add、commit，然后推送
+git push origin dev
+方案二：暂存本地修改（如果修改未完成或暂时不想提交）
+bash
+# 1. 暂存当前修改
+git stash push -m "临时保存 renderer.js 的修改"
+
+# 2. 拉取远程更新（此时工作区干净，不会报错）
+git pull origin dev
+
+# 3. 恢复暂存的修改
+git stash pop
+
+# 4. 如果有冲突，手动解决冲突（与之前解决冲突的方法相同）
+# 5. 解决后 add、commit、push
+方案三：放弃本地修改（如果修改不重要，可以直接丢弃）
+bash
+# 丢弃对 src/renderer.js 的修改（不可恢复！）
+git checkout -- src/renderer.js
+
+# 然后拉取
+git pull origin dev
+建议
+如果本地的修改是你正在开发的功能且还没有完成，推荐使用方案二（stash），这样可以先拉取远程更新，稍后再恢复修改。

@@ -2,7 +2,7 @@ export function createTodoState(initialState = {}) {
   let todos = [];
   let completedTodos = [];
 
-  // 数据迁移兼容旧格式
+
   if (Array.isArray(initialState)) {
     const oldTodos = initialState;
     todos = oldTodos.filter(t => !t.done).map(({ id, text, createdAt }) => ({ id, text, createdAt }));
@@ -37,7 +37,7 @@ export function createTodoState(initialState = {}) {
         createdAt: Date.now()
       });
     },
-    // 编辑待办
+
     editTodo(id, newText) {
       if (!newText || !newText.trim()) return;
       const todo = todos.find(item => item.id === id);

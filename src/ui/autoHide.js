@@ -1,4 +1,3 @@
-// src/ui/autoHide.js
 export function setupAutoHide({ uiState, onHide }) {
   let timer = null;
   let isMouseInsideWindow = false;

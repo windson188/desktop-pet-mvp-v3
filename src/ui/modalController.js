@@ -1,11 +1,3 @@
-// src/ui/modalController.js
-
-/**
- * 显示自定义编辑模态框
- * @param {string} title - 模态框标题
- * @param {string} [defaultValue=''] - 输入框默认值
- * @returns {Promise<string|null>} 用户输入的内容，取消返回 null
- */
 export function showEditDialog(title, defaultValue = '') {
   return new Promise((resolve) => {
     const modal = document.getElementById('edit-modal');

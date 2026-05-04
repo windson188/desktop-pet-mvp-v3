@@ -83,5 +83,9 @@ contextBridge.exposeInMainWorld("desktopPetAPI", {
       return;
     }
     return ipcRenderer.invoke("window:setPosition", x, y);
+  },
+
+  quitApp() {
+    return ipcRenderer.invoke("app:quit");
   }
 });
