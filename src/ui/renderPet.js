@@ -1,6 +1,7 @@
 import { startClapAnimation, stopClapAnimation } from './clapAnimation.js';
 import { startEatAnimation, stopEatAnimation, isEatAnimating } from './eatAnimation.js';
 import { startYoyoAnimation, stopYoyoAnimation, isYoyoAnimating, startIdleYoyoCheck, stopIdleCheck } from './yoyoAnimation.js';
+import { showBubble } from './bubbleController.js';  // 新增：引入显示气泡的方法
 
 export function renderPet({ petState, uiState }) {
   const petEl = document.getElementById("pet");
@@ -13,25 +14,26 @@ export function renderPet({ petState, uiState }) {
 
   if (petEl) {
     const currentEmotion = petState.getEmotion();
-        petEl.classList.remove('idle', 'happy', 'clap', 'eat', 'yoyo');
+    petEl.classList.remove('idle', 'happy', 'clap', 'eat', 'yoyo');
 
     if (currentEmotion === 'clap') {
       startClapAnimation(petEl, petState, () => renderPet({ petState, uiState }));
       petEl.classList.add('clap');
       stopIdleCheck();
-        } else if (currentEmotion === 'eat') {
+    } else if (currentEmotion === 'eat') {
       if (!isEatAnimating()) {
         startEatAnimation(petEl, petState, () => renderPet({ petState, uiState }));
       }
       petEl.classList.add('eat');
       stopIdleCheck();
-        } else if (currentEmotion === 'yoyo') {
+    } else if (currentEmotion === 'yoyo') {
       stopClapAnimation();
       stopEatAnimation();
       if (!isYoyoAnimating()) {
         startYoyoAnimation(petEl, petState, () => renderPet({ petState, uiState }));
       }
       petEl.classList.add('yoyo');
+      showBubble(); // 新增：悠悠球动画时强制显示气泡
     } else {
       stopClapAnimation();
       stopEatAnimation();
@@ -86,6 +88,7 @@ export function renderPet({ petState, uiState }) {
     reminderPanel.classList.add("hidden");
   }
 }
+
 function positionPanel(panel, buttonBar) {
   if (!panel || !buttonBar) return;
 
@@ -141,4 +144,3 @@ export function repositionActivePanel(uiState) {
     positionPanel(panel, buttonBar);
   }
 }
-
