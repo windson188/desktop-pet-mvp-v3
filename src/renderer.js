@@ -12,7 +12,7 @@ import { updateWindowHeight } from './window/resizeController.js';
 import { showBubble, hideBubble, startBubbleCycle, resetBubbleCycle } from './ui/bubbleController.js';
 import { showEditDialog } from './ui/modalController.js';
 import { scheduleReminder, clearAllReminderTimeouts } from './state/reminderScheduler.js';
-import { stopIdleCheck } from './ui/yoyoAnimation.js';
+import { stopIdleCheck } from './ui/idleAnimations.js';
 
 
 let petState, todoState, reminderState, uiState;

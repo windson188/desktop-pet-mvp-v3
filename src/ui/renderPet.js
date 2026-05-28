@@ -1,6 +1,6 @@
 import { startClapAnimation, stopClapAnimation } from './clapAnimation.js';
 import { startEatAnimation, stopEatAnimation, isEatAnimating } from './eatAnimation.js';
-import { startYoyoAnimation, stopYoyoAnimation, isYoyoAnimating, startIdleYoyoCheck, stopIdleCheck } from './yoyoAnimation.js';
+import { startRandomIdleAnimation, stopIdleAnimation, isIdleAnimating, startIdleCheck, stopIdleCheck } from './idleAnimations.js';
 import { showBubble } from './bubbleController.js';  // 新增：引入显示气泡的方法
 
 export function renderPet({ petState, uiState }) {
@@ -29,18 +29,18 @@ export function renderPet({ petState, uiState }) {
     } else if (currentEmotion === 'yoyo') {
       stopClapAnimation();
       stopEatAnimation();
-      if (!isYoyoAnimating()) {
-        startYoyoAnimation(petEl, petState, () => renderPet({ petState, uiState }));
+      if (!isIdleAnimating()) {
+        startRandomIdleAnimation(petEl, petState, () => renderPet({ petState, uiState }));
       }
       petEl.classList.add('yoyo');
-      showBubble(); // 新增：悠悠球动画时强制显示气泡
+      showBubble();
     } else {
       stopClapAnimation();
       stopEatAnimation();
-      if (isYoyoAnimating() || petState.getBubble() === `这招叫'风火轮'，酷不酷？`) {
+      if (isIdleAnimating()) {
         petState.setBubble('');
       }
-      stopYoyoAnimation();
+      stopIdleAnimation();
 
       petEl.style.backgroundSize = '';
       petEl.style.backgroundPosition = '';
@@ -60,7 +60,7 @@ export function renderPet({ petState, uiState }) {
       }
 
       if (currentEmotion === 'idle') {
-        startIdleYoyoCheck(petEl, petState, () => renderPet({ petState, uiState }));
+        startIdleCheck(petEl, petState, () => renderPet({ petState, uiState }));
       }
     }
   }
