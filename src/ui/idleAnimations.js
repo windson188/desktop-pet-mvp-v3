@@ -1,3 +1,5 @@
+import { stopBubbleCycle } from './bubbleController.js';
+
 const FRAME_WIDTH = 180;
 const FRAME_HEIGHT = 180;
 
@@ -17,23 +19,24 @@ const ANIMATIONS = [
     cols: 5, rows: 4, totalFrames: 20,
     duration: 3000,
     lastFrameHold: 500,
-    bubble: '伸个懒腰，好舒服~'
+    bubble: '伸个懒腰，好舒服~',
+    slowRange: { start: 8, end: 14, multiplier: 1.3 }
   },
   {
     name: 'wag',
     sprite: "url('./assets/idle_wag.png')",
     cols: 5, rows: 4, totalFrames: 20,
-    duration: 3000,
-    lastFrameHold: 300,
+    duration: 2400,
+    lastFrameHold: 240,
     bubble: '摇摇尾巴，真开心！'
   },
   {
     name: 'blink',
     sprite: "url('./assets/idle_blink.png')",
     cols: 5, rows: 4, totalFrames: 20,
-    duration: 1500,
-    lastFrameHold: 200,
-    bubble: ''
+    duration: 2400,
+    lastFrameHold: 240,
+    bubble: '眨眨眼~'
   }
 ];
 
@@ -41,6 +44,7 @@ let animTimeout = null;
 let isAnimating = false;
 let idleCheckTimer = null;
 let currentAnim = null;
+let pendingAnimIndex = 0;
 
 function buildFrameSequence(cfg) {
   if (!cfg.repeatStart) {
@@ -71,6 +75,7 @@ function updateFrame(petEl, frameIndex, cols) {
 
 function startAnimation(petEl, petState, reRender, anim) {
   stopAnimation();
+  stopBubbleCycle();
   currentAnim = anim;
   const seq = buildFrameSequence(anim);
   const stepCount = seq.length;
@@ -78,6 +83,12 @@ function startAnimation(petEl, petState, reRender, anim) {
 
   let currentStep = 0;
   isAnimating = true;
+
+  // 直接设置 DOM 气泡文字，绕过 petState，避免竞态
+  const bubbleEl = document.getElementById('bubble');
+  if (bubbleEl && anim.bubble) {
+    bubbleEl.textContent = anim.bubble;
+  }
 
   petEl.style.backgroundSize = `${FRAME_WIDTH * anim.cols}px ${FRAME_HEIGHT * anim.rows}px`;
   petEl.style.backgroundImage = anim.sprite;
@@ -105,9 +116,18 @@ function startAnimation(petEl, petState, reRender, anim) {
       return;
     }
 
-    updateFrame(petEl, seq[currentStep], anim.cols);
+    const frameIndex = seq[currentStep];
+    updateFrame(petEl, frameIndex, anim.cols);
 
-    const delay = (currentStep === stepCount - 1) ? anim.lastFrameHold : stepInterval;
+    let delay;
+    if (currentStep === stepCount - 1) {
+      delay = anim.lastFrameHold;
+    } else {
+      delay = stepInterval;
+      if (anim.slowRange && frameIndex >= anim.slowRange.start && frameIndex <= anim.slowRange.end) {
+        delay *= anim.slowRange.multiplier;
+      }
+    }
     animTimeout = setTimeout(step, delay);
   }
 
@@ -123,10 +143,9 @@ function stopAnimation() {
   currentAnim = null;
 }
 
-export function startRandomIdleAnimation(petEl, petState, reRender) {
+export function startIdleAnimation(petEl, petState, reRender) {
   stopAnimation();
-  const idx = Math.floor(Math.random() * ANIMATIONS.length);
-  startAnimation(petEl, petState, reRender, ANIMATIONS[idx]);
+  startAnimation(petEl, petState, reRender, ANIMATIONS[pendingAnimIndex]);
 }
 
 export function stopIdleAnimation() {
@@ -148,8 +167,8 @@ function scheduleNextIdleCheck(petEl, petState, reRender) {
     idleCheckTimer = null;
 
     if (petState.getEmotion() === 'idle' && !isAnimating) {
-      const idx = Math.floor(Math.random() * ANIMATIONS.length);
-      const anim = ANIMATIONS[idx];
+      pendingAnimIndex = Math.floor(Math.random() * ANIMATIONS.length);
+      const anim = ANIMATIONS[pendingAnimIndex];
       petState.setEmotion('yoyo');
       if (anim.bubble) petState.setBubble(anim.bubble);
       if (reRender) reRender();

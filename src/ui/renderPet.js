@@ -1,6 +1,6 @@
 import { startClapAnimation, stopClapAnimation } from './clapAnimation.js';
 import { startEatAnimation, stopEatAnimation, isEatAnimating } from './eatAnimation.js';
-import { startRandomIdleAnimation, stopIdleAnimation, isIdleAnimating, startIdleCheck, stopIdleCheck } from './idleAnimations.js';
+import { startIdleAnimation, stopIdleAnimation, isIdleAnimating, startIdleCheck, stopIdleCheck } from './idleAnimations.js';
 import { showBubble } from './bubbleController.js';  // 新增：引入显示气泡的方法
 
 export function renderPet({ petState, uiState }) {
@@ -10,10 +10,14 @@ export function renderPet({ petState, uiState }) {
   const todoPanel = document.getElementById("todo-panel");
   const reminderPanel = document.getElementById("reminder-panel");
 
-  if (bubbleEl) bubbleEl.textContent = petState.getBubble();
-
   if (petEl) {
     const currentEmotion = petState.getEmotion();
+
+    // 闲置动画期间不覆盖气泡文字，避免用户点击或定时器干扰
+    if (bubbleEl && (currentEmotion !== 'yoyo' || !isIdleAnimating())) {
+      bubbleEl.textContent = petState.getBubble();
+    }
+
     petEl.classList.remove('idle', 'happy', 'clap', 'eat', 'yoyo');
 
     if (currentEmotion === 'clap') {
@@ -30,7 +34,7 @@ export function renderPet({ petState, uiState }) {
       stopClapAnimation();
       stopEatAnimation();
       if (!isIdleAnimating()) {
-        startRandomIdleAnimation(petEl, petState, () => renderPet({ petState, uiState }));
+        startIdleAnimation(petEl, petState, () => renderPet({ petState, uiState }));
       }
       petEl.classList.add('yoyo');
       showBubble();

@@ -13,7 +13,7 @@ const MIN_HEIGHT = 180;
 const MAX_HEIGHT = 880;
 const FIXED_WIDTH = 320;
 
-const DATA_DIR = path.join(os.homedir(), ".desktop-pet-v2");
+const DATA_DIR = path.join(__dirname, "user_data");
 const DATA_FILE = path.join(DATA_DIR, "app-state.json");
 
 function readSavedWindowBounds() {
