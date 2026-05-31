@@ -1,7 +1,7 @@
 import { startClapAnimation, stopClapAnimation } from './clapAnimation.js';
 import { startEatAnimation, stopEatAnimation, isEatAnimating } from './eatAnimation.js';
-import { startIdleAnimation, stopIdleAnimation, isIdleAnimating, startIdleCheck, stopIdleCheck } from './idleAnimations.js';
-import { showBubble } from './bubbleController.js';  // 新增：引入显示气泡的方法
+import { startIdleAnimation, stopIdleAnimation, isIdleAnimating, startIdleCheck, stopIdleCheck, getPendingBubble } from './idleAnimations.js';
+import { showBubble, hideBubble } from './bubbleController.js';
 
 export function renderPet({ petState, uiState }) {
   const petEl = document.getElementById("pet");
@@ -37,7 +37,11 @@ export function renderPet({ petState, uiState }) {
         startIdleAnimation(petEl, petState, () => renderPet({ petState, uiState }));
       }
       petEl.classList.add('yoyo');
-      showBubble();
+      if (getPendingBubble()) {
+        showBubble();
+      } else {
+        hideBubble();
+      }
     } else {
       stopClapAnimation();
       stopEatAnimation();

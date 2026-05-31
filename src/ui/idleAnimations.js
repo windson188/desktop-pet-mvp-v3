@@ -32,11 +32,66 @@ const ANIMATIONS = [
   },
   {
     name: 'blink',
-    sprite: "url('./assets/idle_blink.png')",
-    cols: 5, rows: 4, totalFrames: 20,
-    duration: 2400,
-    lastFrameHold: 240,
-    bubble: '眨眨眼~'
+    sprite: "url('./assets/sprite_blink.png')",
+    cols: 6, rows: 1, totalFrames: 6,
+    duration: 800,
+    lastFrameHold: 80,
+    bubble: '',
+    pingPong: true
+  },
+  {
+    name: 'blink_quick',
+    sprite: "url('./assets/sprite_blink.png')",
+    cols: 6, rows: 1, totalFrames: 6,
+    duration: 800,
+    lastFrameHold: 80,
+    bubble: '',
+    pingPong: true
+  },
+  {
+    name: 'blink_quick',
+    sprite: "url('./assets/sprite_blink.png')",
+    cols: 6, rows: 1, totalFrames: 6,
+    duration: 800,
+    lastFrameHold: 80,
+    bubble: '',
+    pingPong: true
+  },
+  {
+    name: 'blink_quick',
+    sprite: "url('./assets/sprite_blink.png')",
+    cols: 6, rows: 1, totalFrames: 6,
+    duration: 800,
+    lastFrameHold: 80,
+    bubble: '',
+    pingPong: true
+  },
+  {
+    name: 'blink_quick',
+    sprite: "url('./assets/sprite_blink.png')",
+    cols: 6, rows: 1, totalFrames: 6,
+    duration: 800,
+    lastFrameHold: 80,
+    bubble: '',
+    pingPong: true
+  },
+  {
+    name: 'blink_quick',
+    sprite: "url('./assets/sprite_blink.png')",
+    cols: 6, rows: 1, totalFrames: 6,
+    duration: 800,
+    lastFrameHold: 80,
+    bubble: '',
+    pingPong: true
+  },
+  {
+    name: 'blink_quick',
+    sprite: "url('./assets/sprite_blink.png')",
+    cols: 6, rows: 1, totalFrames: 6,
+    duration: 800,
+    lastFrameHold: 80,
+    bubble: '',
+    pingPong: true
   }
 ];
 
@@ -47,18 +102,29 @@ let currentAnim = null;
 let pendingAnimIndex = 0;
 
 function buildFrameSequence(cfg) {
-  if (!cfg.repeatStart) {
-    const seq = [];
+  let seq;
+
+  if (cfg.frameRange) {
+    seq = [];
+    for (let i = cfg.frameRange.start; i <= cfg.frameRange.end; i++) seq.push(i);
+  } else if (!cfg.repeatStart) {
+    seq = [];
     for (let i = 0; i < cfg.totalFrames; i++) seq.push(i);
-    return seq;
+  } else {
+    seq = [];
+    for (let i = 0; i < cfg.repeatStart; i++) seq.push(i);
+    for (let r = 0; r < 1 + cfg.extraRepeats; r++) {
+      for (let i = cfg.repeatStart; i <= cfg.repeatEnd; i++) seq.push(i);
+    }
+    for (let i = cfg.repeatEnd + 1; i < cfg.totalFrames; i++) seq.push(i);
   }
 
-  const seq = [];
-  for (let i = 0; i < cfg.repeatStart; i++) seq.push(i);
-  for (let r = 0; r < 1 + cfg.extraRepeats; r++) {
-    for (let i = cfg.repeatStart; i <= cfg.repeatEnd; i++) seq.push(i);
+  if (cfg.pingPong) {
+    for (let i = seq.length - 2; i >= 0; i--) {
+      seq.push(seq[i]);
+    }
   }
-  for (let i = cfg.repeatEnd + 1; i < cfg.totalFrames; i++) seq.push(i);
+
   return seq;
 }
 
@@ -86,8 +152,12 @@ function startAnimation(petEl, petState, reRender, anim) {
 
   // 直接设置 DOM 气泡文字，绕过 petState，避免竞态
   const bubbleEl = document.getElementById('bubble');
-  if (bubbleEl && anim.bubble) {
-    bubbleEl.textContent = anim.bubble;
+  if (bubbleEl) {
+    if (anim.bubble) {
+      bubbleEl.textContent = anim.bubble;
+    } else {
+      bubbleEl.classList.add('hidden');
+    }
   }
 
   petEl.style.backgroundSize = `${FRAME_WIDTH * anim.cols}px ${FRAME_HEIGHT * anim.rows}px`;
@@ -183,6 +253,10 @@ export function startIdleCheck(petEl, petState, reRender) {
 
 export function getIdleAnimName() {
   return currentAnim ? currentAnim.name : null;
+}
+
+export function getPendingBubble() {
+  return ANIMATIONS[pendingAnimIndex].bubble;
 }
 
 export function isIdleAnimating() {
