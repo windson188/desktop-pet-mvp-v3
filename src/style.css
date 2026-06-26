@@ -129,13 +129,8 @@ body {
   animation: happyAnim 2.0s steps(13) forwards;
 }
 
-.pet-sprite.clap {
-  background-image: url('./assets/clap.png');
-}
-
 @keyframes happyAnim {
   0%   { background-position: 0 0; }
-  100% { background-position: -2340px 0; }
   100% { background-position: -2340px 0; }
 }
 

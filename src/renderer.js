@@ -9,7 +9,7 @@ import { renderPet, repositionActivePanel } from './ui/renderPet.js';
 import { renderTodos } from './ui/renderTodos.js';
 import { renderReminders } from './ui/renderReminders.js';
 import { updateWindowHeight } from './window/resizeController.js';
-import { showBubble, hideBubble, startBubbleCycle, resetBubbleCycle } from './ui/bubbleController.js';
+import { showBubble, hideBubble, stopBubbleCycle, startBubbleCycle, resetBubbleCycle } from './ui/bubbleController.js';
 import { showEditDialog } from './ui/modalController.js';
 import { scheduleReminder, clearAllReminderTimeouts } from './state/reminderScheduler.js';
 import { stopIdleCheck, setPendingIdleAnimIndex } from './ui/idleAnimations.js';
@@ -93,6 +93,7 @@ function renderAll() {
     },
     onCompleteReminder: (id, reminderText) => {
       petState.setBubble(`主人，你真棒，又完成${reminderText}了哦！`);
+      petState.setEmotion('clap');
       reminderState.completeReminder(id);
       persist().then(() => {
         renderAll();
@@ -222,19 +223,19 @@ function bindEvents() {
     }
     uiState.wakeUp();
 
-    const reaction = CLICK_REACTIONS[Math.floor(Math.random() * CLICK_REACTIONS.length)];
-    petState.setBubble(reaction.bubble);
-    if (reaction.type === 'idle') {
-      setPendingIdleAnimIndex(reaction.animIndex);
-      petState.setEmotion('yoyo');
-    } else {
-      petState.setEmotion(reaction.type);
-    }
-
     clickCount++;
     if (clickCount >= 10) {
       petState.addClickBond();
       clickCount = 0;
+    } else {
+      const reaction = CLICK_REACTIONS[Math.floor(Math.random() * CLICK_REACTIONS.length)];
+      petState.setBubble(reaction.bubble);
+      if (reaction.type === 'idle') {
+        setPendingIdleAnimIndex(reaction.animIndex);
+        petState.setEmotion('yoyo');
+      } else {
+        petState.setEmotion(reaction.type);
+      }
     }
     persist().then(() => {
       renderAll();
