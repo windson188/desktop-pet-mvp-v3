@@ -34,8 +34,8 @@ const ANIMATIONS = [
     name: 'blink',
     sprite: "url('./assets/sprite_blink.png')",
     cols: 6, rows: 1, totalFrames: 6,
-    duration: 800,
-    lastFrameHold: 80,
+    duration: 500,
+    lastFrameHold: 50,
     bubble: '',
     pingPong: true
   },
@@ -43,8 +43,8 @@ const ANIMATIONS = [
     name: 'blink_quick',
     sprite: "url('./assets/sprite_blink.png')",
     cols: 6, rows: 1, totalFrames: 6,
-    duration: 800,
-    lastFrameHold: 80,
+    duration: 500,
+    lastFrameHold: 50,
     bubble: '',
     pingPong: true
   },
@@ -52,8 +52,8 @@ const ANIMATIONS = [
     name: 'blink_quick',
     sprite: "url('./assets/sprite_blink.png')",
     cols: 6, rows: 1, totalFrames: 6,
-    duration: 800,
-    lastFrameHold: 80,
+    duration: 500,
+    lastFrameHold: 50,
     bubble: '',
     pingPong: true
   },
@@ -61,8 +61,8 @@ const ANIMATIONS = [
     name: 'blink_quick',
     sprite: "url('./assets/sprite_blink.png')",
     cols: 6, rows: 1, totalFrames: 6,
-    duration: 800,
-    lastFrameHold: 80,
+    duration: 500,
+    lastFrameHold: 50,
     bubble: '',
     pingPong: true
   },
@@ -70,8 +70,8 @@ const ANIMATIONS = [
     name: 'blink_quick',
     sprite: "url('./assets/sprite_blink.png')",
     cols: 6, rows: 1, totalFrames: 6,
-    duration: 800,
-    lastFrameHold: 80,
+    duration: 500,
+    lastFrameHold: 50,
     bubble: '',
     pingPong: true
   },
@@ -79,8 +79,8 @@ const ANIMATIONS = [
     name: 'blink_quick',
     sprite: "url('./assets/sprite_blink.png')",
     cols: 6, rows: 1, totalFrames: 6,
-    duration: 800,
-    lastFrameHold: 80,
+    duration: 500,
+    lastFrameHold: 50,
     bubble: '',
     pingPong: true
   },
@@ -88,8 +88,8 @@ const ANIMATIONS = [
     name: 'blink_quick',
     sprite: "url('./assets/sprite_blink.png')",
     cols: 6, rows: 1, totalFrames: 6,
-    duration: 800,
-    lastFrameHold: 80,
+    duration: 500,
+    lastFrameHold: 50,
     bubble: '',
     pingPong: true
   }
@@ -257,6 +257,10 @@ export function getIdleAnimName() {
 
 export function getPendingBubble() {
   return ANIMATIONS[pendingAnimIndex].bubble;
+}
+
+export function setPendingIdleAnimIndex(index) {
+  pendingAnimIndex = Math.max(0, Math.min(index, ANIMATIONS.length - 1));
 }
 
 export function isIdleAnimating() {

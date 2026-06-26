@@ -12,7 +12,7 @@ import { updateWindowHeight } from './window/resizeController.js';
 import { showBubble, hideBubble, startBubbleCycle, resetBubbleCycle } from './ui/bubbleController.js';
 import { showEditDialog } from './ui/modalController.js';
 import { scheduleReminder, clearAllReminderTimeouts } from './state/reminderScheduler.js';
-import { stopIdleCheck } from './ui/idleAnimations.js';
+import { stopIdleCheck, setPendingIdleAnimIndex } from './ui/idleAnimations.js';
 
 
 let petState, todoState, reminderState, uiState;
@@ -198,7 +198,16 @@ function bindEvents() {
     resetBubbleCycle({ petState, renderAll });
   });
 
-pet?.addEventListener("click", () => {
+  const CLICK_REACTIONS = [
+    { type: 'idle', animIndex: 0, bubble: "这招叫'风火轮'，酷不酷？" },
+    { type: 'idle', animIndex: 1, bubble: '伸个懒腰，好舒服~' },
+    { type: 'idle', animIndex: 2, bubble: '摇摇尾巴，真开心！' },
+    { type: 'idle', animIndex: 3, bubble: '' },
+    { type: 'happy', animIndex: -1, bubble: '嘿嘿，被摸摸了' },
+    { type: 'clap', animIndex: -1, bubble: '主人，你真棒！' }
+  ];
+
+  pet?.addEventListener("click", () => {
     if (window._disablePetClick) return;
 
     if (dragJustHappened) {
@@ -212,8 +221,16 @@ pet?.addEventListener("click", () => {
       updateWindowHeight();
     }
     uiState.wakeUp();
-    petState.sayRandom();
-    
+
+    const reaction = CLICK_REACTIONS[Math.floor(Math.random() * CLICK_REACTIONS.length)];
+    petState.setBubble(reaction.bubble);
+    if (reaction.type === 'idle') {
+      setPendingIdleAnimIndex(reaction.animIndex);
+      petState.setEmotion('yoyo');
+    } else {
+      petState.setEmotion(reaction.type);
+    }
+
     clickCount++;
     if (clickCount >= 10) {
       petState.addClickBond();

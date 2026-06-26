@@ -39,13 +39,38 @@ export function setupAutoHide({ uiState, onHide }) {
     startTimer();
   }
 
+  let panelCloseTimer = null;
+
+  function clearPanelCloseTimer() {
+    if (panelCloseTimer) {
+      clearTimeout(panelCloseTimer);
+      panelCloseTimer = null;
+    }
+  }
+
+  function schedulePanelClose() {
+    clearPanelCloseTimer();
+    panelCloseTimer = setTimeout(() => {
+      if (uiState.getActivePanel()) {
+        uiState.setActivePanel(null);
+        onHide();
+      }
+      panelCloseTimer = null;
+      startTimer();
+    }, 10000);
+  }
+
   function initWindowMouseTracking() {
     document.body.addEventListener('mouseenter', () => {
       isMouseInsideWindow = true;
+      clearPanelCloseTimer();
       resetTimer();
     });
     document.body.addEventListener('mouseleave', () => {
       isMouseInsideWindow = false;
+      if (uiState.getActivePanel()) {
+        schedulePanelClose();
+      }
       resetTimer();
     });
   }
