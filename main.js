@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, screen } = require("electron");
+const { app, BrowserWindow, ipcMain, screen, dialog } = require("electron");
 const path = require("path");
 const fs = require("fs");
 const os = require("os");
@@ -171,6 +171,22 @@ app.whenReady().then(() => {
     const numY = Number(y);
     if (isNaN(numX) || isNaN(numY)) return;
     mainWindow.setPosition(Math.round(numX), Math.round(numY));
+  });
+
+  ipcMain.handle("dialog:saveFile", async (_, { defaultName, content }) => {
+    if (!mainWindow) return { success: false };
+    const result = await dialog.showSaveDialog(mainWindow, {
+      defaultPath: defaultName,
+      filters: [{ name: "CSV 文件", extensions: ["csv"] }]
+    });
+    if (result.canceled || !result.filePath) return { success: false };
+    try {
+      fs.writeFileSync(result.filePath, content, "utf-8");
+      return { success: true };
+    } catch (err) {
+      console.error("保存文件失败:", err);
+      return { success: false };
+    }
   });
 });
 

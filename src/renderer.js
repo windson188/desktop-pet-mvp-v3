@@ -288,6 +288,93 @@ function bindEvents() {
     }, 0);
   });
 
+  const exportBtn = document.getElementById("export-todo-btn");
+  exportBtn?.addEventListener("click", () => {
+    const exportModal = document.getElementById("export-modal");
+    const monthRow = document.getElementById("export-month-row");
+    const monthPicker = document.getElementById("export-month-picker");
+    const radioAll = exportModal.querySelector('input[value="all"]');
+    const radioMonth = exportModal.querySelector('input[value="month"]');
+
+    radioAll.checked = true;
+    monthRow.style.display = "none";
+    monthPicker.value = "";
+    exportModal.classList.remove("hidden");
+
+    const radioChange = () => {
+      monthRow.style.display = radioMonth.checked ? "block" : "none";
+    };
+    radioAll.addEventListener("change", radioChange);
+    radioMonth.addEventListener("change", radioChange);
+
+    const cleanup = () => {
+      exportModal.classList.add("hidden");
+      radioAll.removeEventListener("change", radioChange);
+      radioMonth.removeEventListener("change", radioChange);
+      document.getElementById("export-cancel").removeEventListener("click", onCancel);
+      document.getElementById("export-confirm").removeEventListener("click", onConfirm);
+    };
+
+    const doExport = async (monthFilter) => {
+      const todos = todoState.getTodos();
+      const completed = todoState.getCompletedTodos();
+
+      let filteredCompleted = completed;
+      if (monthFilter) {
+        const [year, month] = monthFilter.split("-").map(Number);
+        const monthStart = new Date(year, month - 1, 1).getTime();
+        const monthEnd = new Date(year, month, 0, 23, 59, 59, 999).getTime();
+        filteredCompleted = completed.filter(
+          (t) => t.completedAt >= monthStart && t.completedAt <= monthEnd
+        );
+      }
+
+      const activeTodos = monthFilter ? [] : todos;
+      if (!activeTodos.length && !filteredCompleted.length) return;
+
+      const BOM = "﻿";
+      const header = "序号,工作内容,登记时间,完成时间,状态";
+      const rows = [];
+
+      const allItems = [
+        ...activeTodos.map((t, i) => ({ ...t, idx: i + 1, status: "进行中" })),
+        ...filteredCompleted.map((t, i) => ({ ...t, idx: activeTodos.length + i + 1, status: "已完成" }))
+      ];
+
+      allItems.forEach((item) => {
+        const createdAt = new Date(item.createdAt).toLocaleString("zh-CN");
+        const completedAt = item.completedAt
+          ? new Date(item.completedAt).toLocaleString("zh-CN")
+          : "";
+        const text = `"${(item.text || "").replace(/"/g, '""')}"`;
+        rows.push(`${item.idx},${text},${createdAt},${completedAt},${item.status}`);
+      });
+
+      const csv = BOM + header + "\n" + rows.join("\n");
+      const now = new Date();
+      const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+      const fileSuffix = monthFilter ? `_${monthFilter}` : "";
+      await window.desktopPetAPI.saveFile({
+        defaultName: `待办记录${fileSuffix}_${dateStr}.csv`,
+        content: csv
+      });
+    };
+
+    const onCancel = () => {
+      cleanup();
+    };
+
+    const onConfirm = () => {
+      const monthFilter = radioMonth.checked ? monthPicker.value : null;
+      if (radioMonth.checked && !monthFilter) return;
+      cleanup();
+      doExport(monthFilter);
+    };
+
+    document.getElementById("export-cancel").addEventListener("click", onCancel);
+    document.getElementById("export-confirm").addEventListener("click", onConfirm);
+  });
+
   document.addEventListener('click', (e) => {
     const addBtn = e.target.closest('.add-btn');
     if (addBtn) {

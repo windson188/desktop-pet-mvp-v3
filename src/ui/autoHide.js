@@ -48,14 +48,25 @@ export function setupAutoHide({ uiState, onHide }) {
     }
   }
 
+  function isExportModalOpen() {
+    const modal = document.getElementById("export-modal");
+    return modal && !modal.classList.contains("hidden");
+  }
+
+  function closeExportModal() {
+    const modal = document.getElementById("export-modal");
+    if (modal) modal.classList.add("hidden");
+  }
+
   function schedulePanelClose() {
     clearPanelCloseTimer();
     panelCloseTimer = setTimeout(() => {
       if (uiState.getActivePanel()) {
         uiState.setActivePanel(null);
-        onHide();
       }
+      closeExportModal();
       panelCloseTimer = null;
+      onHide();
       startTimer();
     }, 10000);
   }
@@ -68,7 +79,7 @@ export function setupAutoHide({ uiState, onHide }) {
     });
     document.body.addEventListener('mouseleave', () => {
       isMouseInsideWindow = false;
-      if (uiState.getActivePanel()) {
+      if (uiState.getActivePanel() || isExportModalOpen()) {
         schedulePanelClose();
       }
       resetTimer();

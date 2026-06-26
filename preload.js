@@ -87,5 +87,9 @@ contextBridge.exposeInMainWorld("desktopPetAPI", {
 
   quitApp() {
     return ipcRenderer.invoke("app:quit");
+  },
+
+  saveFile({ defaultName, content }) {
+    return ipcRenderer.invoke("dialog:saveFile", { defaultName, content });
   }
 });
